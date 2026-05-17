@@ -16,7 +16,7 @@ namespace EArenaTournamentManager.Domain.Entities
         public string? LogoImageUrl { get; set; }
 
         public virtual User? Captain { get; set; }
-        public virtual ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
-        public virtual ICollection<TournamentParticipant> TournamentParticipants { get; set; } = new List<TournamentParticipant>();
+        public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+        public virtual ICollection<TournamentParticipant> TournamentEntries { get; set; } = new List<TournamentParticipant>();
     }
 }
