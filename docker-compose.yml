@@ -3,7 +3,7 @@ version: '3.8'
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: e-arena-tournament-manager-sqlserver
+    container_name: e-arena-sqlserver
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourStrongPassword123!
@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: src/EArenaTournamentManager.API/Dockerfile
-    container_name: e-arena-tournament-manager-api
+    container_name: e-arena-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EArenaTournamentManagerDb;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
@@ -33,7 +33,7 @@ services:
     build:
       context: .
       dockerfile: src/EArenaTournamentManager.Web/Dockerfile
-    container_name: e-arena-tournament-manager-web
+    container_name: e-arena-web
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
