@@ -27,6 +27,9 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
             _context = context ?? throw new ArgumentNullException(nameof(context), "An instance of DbContext is required to use this repository!");
         }
 
+        public EArenaAppDbContext Context
+            => _context;
+
         public IRepository<User> Users
             => _users ??= new Repository<User>(_context);
 
@@ -49,7 +52,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
             => _organizationStaff ??= new Repository<OrganizationStaff>(_context);
 
         public IRepository<TournamentParticipant> TournamentParticipants
-            => _tournamentParticipants ??= new Repository<TournamentParticipant>(_context);
+            => _tournamentParticipants ??= new Repository<TournamentParticipant>(_context);        
 
         public async Task<int> SaveChangesAsync()
             => await _context.SaveChangesAsync();

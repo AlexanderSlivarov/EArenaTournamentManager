@@ -60,10 +60,13 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
                 entity.HasKey(u => u.Id);
 
                 entity.Property(u => u.Username).IsRequired();
-                entity.Property(u => u.PasswordHash).IsRequired();
-                entity.Property(u => u.PasswordSalt).IsRequired();
+                entity.Property(u => u.PasswordHash).IsRequired();                
                 entity.Property(u => u.Email).IsRequired();
                 entity.Property(u => u.AvatarImageUrl).IsRequired(false);
+
+                entity.Property(u => u.Role)
+                      .HasConversion<string>()
+                      .IsRequired();
 
                 entity.HasIndex(u => u.Username).IsUnique();
                 entity.HasIndex(u => u.Email).IsUnique();

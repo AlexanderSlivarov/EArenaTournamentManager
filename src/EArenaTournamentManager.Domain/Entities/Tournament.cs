@@ -20,7 +20,7 @@ namespace EArenaTournamentManager.Domain.Entities
         public long DateTime { get; set; }        
         public string? Rules { get; set; }
         public string? Prizes { get; set; }
-        public required RegistrationStatus? Status { get; set; }
+        public required RegistrationStatus Status { get; set; }
 
         public virtual Game? Game { get; set; }
         public virtual Organization? Organization { get; set; }
