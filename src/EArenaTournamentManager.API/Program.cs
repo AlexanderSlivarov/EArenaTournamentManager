@@ -1,62 +1,46 @@
+using EArenaTournamentManager.API.Extensions;
 using EArenaTournamentManager.API.Middleware;
-using EArenaTournamentManager.Infrastructure.Persistence;
-using EArenaTournamentManager.Infrastructure.Repositories.Implementations;
-using EArenaTournamentManager.Infrastructure.Repositories.Interfaces;
-using EArenaTournamentManager.Infrastructure.Security.Implementations;
-using EArenaTournamentManager.Infrastructure.Security.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using EArenaTournamentManager.Infrastructure.Persistance.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-        };
-    });
-
-builder.Services.AddDbContext<EArenaAppDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+var retries = 5;
+while (retries > 0)
+{
+    try
+    {
+        await DbSeeder.SeedAdminAsync(app.Services);
+        logger.LogInformation("Database seeding completed successfully.");
+        break;
+    }
+    catch (Exception ex)
+    {
+        retries--;
+        logger.LogWarning("Seeding failed, retries left {Retries}: {Message}", retries, ex.Message);
+        if (retries == 0)
+        {
+            logger.LogError(ex, "Seeding failed after all retries. Shutting down.");
+            throw;
+        }
+        await Task.Delay(5000);
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

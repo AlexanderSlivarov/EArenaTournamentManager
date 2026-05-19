@@ -12,7 +12,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Interfaces
     {
         EArenaAppDbContext Context { get; }
 
-        IRepository<User> Users { get; }
+        IUserRepository Users { get; }
         IRepository<Game> Games { get; }
         IRepository<Team> Teams { get; }
         IRepository<Organization> Organizations { get; }

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace EArenaTournamentManager.Application.Common.Extensions
 {
-    public class ServiceResultExtensions<T>
+    public class ServiceResultExtensions
     {
-        public static ServiceResult<T> Failure(T data, ModelStateDictionary errors)
+        public static ServiceResult<T> Failure<T>(T? data, ModelStateDictionary errors)
         {
             List<Error> errorList = new List<Error>();
 

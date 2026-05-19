@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EArenaTournamentManager.Infrastructure\EArenaTournamentManager.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

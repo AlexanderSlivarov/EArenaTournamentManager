@@ -13,7 +13,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
     {
         private readonly EArenaAppDbContext _context;
 
-        private IRepository<User>? _users;
+        private IUserRepository? _users;
         private IRepository<Game>? _games;
         private IRepository<Team>? _teams;
         private IRepository<Organization>? _organizations;
@@ -30,8 +30,8 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
         public EArenaAppDbContext Context
             => _context;
 
-        public IRepository<User> Users
-            => _users ??= new Repository<User>(_context);
+        public IUserRepository Users
+            => _users ??= new UserRepository(_context);
 
         public IRepository<Game> Games
             => _games ??= new Repository<Game>(_context);
