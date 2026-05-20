@@ -5,6 +5,7 @@ using EArenaTournamentManager.Application.DTOs.Auth;
 using EArenaTournamentManager.Application.Common.Results;
 using EArenaTournamentManager.Domain.Entities;
 using EArenaTournamentManager.Domain.Enums;
+using EArenaTournamentManager.Application.ResponseDTOs.Auth;
 
 namespace EArenaTournamentManager.Application.Services
 {

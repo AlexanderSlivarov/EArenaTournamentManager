@@ -1,5 +1,6 @@
 ﻿using EArenaTournamentManager.Application.Common.Results;
 using EArenaTournamentManager.Application.DTOs.Auth;
+using EArenaTournamentManager.Application.ResponseDTOs.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

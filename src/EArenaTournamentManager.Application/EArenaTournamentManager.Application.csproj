@@ -14,4 +14,8 @@
     <ProjectReference Include="..\EArenaTournamentManager.Infrastructure\EArenaTournamentManager.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="RequestDTOs\Users\" />
+  </ItemGroup>
+
 </Project>

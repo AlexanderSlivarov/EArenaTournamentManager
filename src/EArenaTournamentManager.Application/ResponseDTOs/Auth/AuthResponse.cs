@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EArenaTournamentManager.Application.DTOs.Auth
+namespace EArenaTournamentManager.Application.ResponseDTOs.Auth
 {
     public class AuthResponse
     {
