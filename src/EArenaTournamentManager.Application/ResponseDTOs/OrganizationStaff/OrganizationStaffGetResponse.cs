@@ -10,6 +10,6 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.OrganizationStaff
 {
     public class OrganizationStaffGetResponse : BaseGetResponse<OrganizationStaffResponse>
     {
-        public OrganizationStaffGetFilterRequest Filter { get; set; }
+        public OrganizationStaffGetFilterRequest? Filter { get; set; }
     }
 }

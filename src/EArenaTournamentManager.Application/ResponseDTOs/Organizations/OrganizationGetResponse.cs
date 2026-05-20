@@ -11,6 +11,6 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Organizations
 {
     public class OrganizationGetResponse : BaseGetResponse<OrganizationResponse>
     {
-        public OrganizationGetFilterRequest Filter { get; set; }
+        public OrganizationGetFilterRequest? Filter { get; set; }
     }
 }

@@ -10,6 +10,6 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Teams
 {
     public class TeamGetResponse : BaseGetResponse<TeamResponse>
     {
-        public TeamGetFilterRequest Filter { get; set; }
+        public TeamGetFilterRequest? Filter { get; set; }
     }
 }
