@@ -14,7 +14,7 @@ namespace EArenaTournamentManager.Domain.Entities
         public int UserId { get; set; }
                 
         public long JoinedOn { get; set; }
-        public required OrganizationStaffRole Role { get; set; }
+        public OrganizationStaffRole Role { get; set; }
 
         public virtual Organization? Organization { get; set; }   
         public virtual User? User { get; set; }        

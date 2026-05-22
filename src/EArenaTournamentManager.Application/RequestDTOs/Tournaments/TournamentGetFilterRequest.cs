@@ -13,7 +13,12 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Tournaments
         public int? OrganizationId { get; set; }
 
         public string? Name { get; set; }
-
         public RegistrationStatus? Status { get; set; }
+
+        public string? Region { get; set; }
+        public string? Format { get; set; }
+
+        public long? DateFrom { get; set; }
+        public long? DateTo { get; set; }
     }
 }

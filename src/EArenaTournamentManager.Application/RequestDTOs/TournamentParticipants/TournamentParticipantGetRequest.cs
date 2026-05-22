@@ -9,6 +9,6 @@ namespace EArenaTournamentManager.Application.RequestDTOs.TournamentParticipants
 {
     public class TournamentParticipantGetRequest : BaseGetRequest
     {
-        public required TournamentParticipantGetFilterRequest Filter { get; set; }
+        public TournamentParticipantGetFilterRequest Filter { get; set; } = new TournamentParticipantGetFilterRequest();
     }
 }

@@ -12,7 +12,7 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Teams
 
         public int CaptainId { get; set; }
 
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? LogoImageUrl { get; set; }
     }

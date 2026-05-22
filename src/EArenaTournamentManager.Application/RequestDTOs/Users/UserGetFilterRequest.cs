@@ -10,6 +10,7 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Users
     public class UserGetFilterRequest
     {   
         public string? Username { get; set; }
+        public string? Email { get; set; }
 
         public UserRole? Role { get; set; }
     }

@@ -13,14 +13,14 @@ namespace EArenaTournamentManager.Domain.Entities
         public int GameId { get; set; }
         public int OrganizationId { get; set; }
 
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Format { get; set; }
         public string? Map { get; set; }
         public string? Region { get; set; }
         public long DateTime { get; set; }        
         public string? Rules { get; set; }
         public string? Prizes { get; set; }
-        public required RegistrationStatus Status { get; set; }
+        public RegistrationStatus Status { get; set; }
 
         public virtual Game? Game { get; set; }
         public virtual Organization? Organization { get; set; }

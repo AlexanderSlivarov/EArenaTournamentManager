@@ -9,6 +9,6 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Organizations
 {
     public class OrganizationGetRequest : BaseGetRequest
     {
-        public required OrganizationGetFilterRequest Filter { get; set; }
+        public OrganizationGetFilterRequest Filter { get; set; } = new OrganizationGetFilterRequest();
     }
 }

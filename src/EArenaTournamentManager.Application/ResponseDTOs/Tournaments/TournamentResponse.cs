@@ -14,7 +14,7 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Tournaments
         public int GameId { get; set; }
         public int OrganizationId { get; set; }
 
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Format { get; set; }
         public string? Map { get; set; }
         public string? Region { get; set; }
@@ -23,6 +23,6 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Tournaments
         public long DateTime { get; set; }
 
         public RegistrationStatus? Status { get; set; }
-        public string StatusName => Status.ToString();
+        public string StatusName => Status.ToString()!;
     }
 }

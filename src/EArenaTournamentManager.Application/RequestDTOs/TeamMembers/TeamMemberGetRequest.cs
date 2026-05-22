@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EArenaTournamentManager.Application.RequestDTOs.Shared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace EArenaTournamentManager.Application.RequestDTOs.TeamMembers
 {
-    public class TeamMemberGetRequest
+    public class TeamMemberGetRequest : BaseGetRequest
     {
-        public required TeamMemberGetFilterRequest Filter { get; set; }
+        public TeamMemberGetFilterRequest Filter { get; set; } = new TeamMemberGetFilterRequest();
     }
 }

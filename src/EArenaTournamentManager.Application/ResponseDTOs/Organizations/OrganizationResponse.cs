@@ -11,12 +11,12 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Organizations
     {
         public int Id { get; set; }
 
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? LogoImageUrl { get; set; }
         public string? HeaderImageUrl { get; set; }
 
         public OrganizationType? Type { get; set; }
-        public string TypeName => Type.ToString();
+        public string TypeName => Type.ToString()!;
     }
 }

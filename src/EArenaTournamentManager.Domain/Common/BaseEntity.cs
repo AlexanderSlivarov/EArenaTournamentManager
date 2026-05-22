@@ -10,8 +10,8 @@ namespace EArenaTournamentManager.Domain.Common
     {
         public int Id { get; set; }
 
-        public required int CreatedBy { get; set; }
-        public required long CreatedOn { get; set; }
+        public int CreatedBy { get; set; }
+        public long CreatedOn { get; set; }
 
         public int? UpdatedBy { get; set; }
         public long? UpdatedOn { get; set; }

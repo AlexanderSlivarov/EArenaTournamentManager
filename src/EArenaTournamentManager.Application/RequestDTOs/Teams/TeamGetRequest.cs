@@ -9,6 +9,6 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Teams
 {
     public class TeamGetRequest : BaseGetRequest
     {
-       public required TeamGetFilterRequest Filter { get; set; }
+        public TeamGetFilterRequest Filter { get; set; } = new TeamGetFilterRequest();
     }
 }

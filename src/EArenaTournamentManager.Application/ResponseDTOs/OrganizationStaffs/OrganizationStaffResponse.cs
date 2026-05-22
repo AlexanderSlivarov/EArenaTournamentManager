@@ -17,6 +17,6 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.OrganizationStaff
         public long JoinedOn { get; set; }
 
         public OrganizationStaffRole? Role { get; set; }
-        public string RoleName => Role.ToString();
+        public string RoleName => Role.ToString()!;
     }
 }

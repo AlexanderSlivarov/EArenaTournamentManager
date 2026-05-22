@@ -9,10 +9,10 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Games
 {
     public class GameRequest
     {
-        public required string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? ImageUrl { get; set; }
-        
-        public Platform Platform { get; set; }
+
+        public Platform Platform { get; set; } = Platform.PC;
     }
 }

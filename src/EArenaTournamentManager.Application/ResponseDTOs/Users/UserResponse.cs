@@ -11,11 +11,11 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Users
     {
         public int Id { get; set; }
 
-        public required string Username { get; set; }
-        public required string Email { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? AvatarImageUrl { get; set; }
 
         public UserRole? Role { get; set; }
-        public string RoleName => Role.ToString();
+        public string RoleName => Role.ToString()!;
     }
 }
