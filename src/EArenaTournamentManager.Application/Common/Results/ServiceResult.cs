@@ -10,7 +10,7 @@ namespace EArenaTournamentManager.Application.Common.Results
     {
         public bool IsSuccess { get; set; }
         public T? Data { get; set; }
-        public List<Error>? Erros { get; set; }
+        public List<Error>? Errors { get; set; }
 
         public static ServiceResult<T> Success(T data)
         {
@@ -18,7 +18,7 @@ namespace EArenaTournamentManager.Application.Common.Results
             {
                 IsSuccess = true,
                 Data = data,
-                Erros = null
+                Errors = null
             };
         }
 
@@ -28,7 +28,7 @@ namespace EArenaTournamentManager.Application.Common.Results
             {
                 IsSuccess = false,
                 Data = data,
-                Erros = errors
+                Errors = errors
             };
         }
     }

@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 namespace EArenaTournamentManager.Infrastructure.Repositories.Interfaces
 {
     public interface IUnitOfWork : IDisposable
-    {
-        EArenaAppDbContext Context { get; }
-
+    {        
         IUserRepository Users { get; }
         IRepository<Game> Games { get; }
         IRepository<Team> Teams { get; }

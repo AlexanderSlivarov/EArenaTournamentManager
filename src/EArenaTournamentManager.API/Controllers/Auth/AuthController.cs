@@ -1,7 +1,7 @@
 ﻿using EArenaTournamentManager.Application.Common.Extensions;
 using EArenaTournamentManager.Application.DTOs.Auth;
-using EArenaTournamentManager.Application.Interfaces;
 using EArenaTournamentManager.Application.ResponseDTOs.Auth;
+using EArenaTournamentManager.Application.Services.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

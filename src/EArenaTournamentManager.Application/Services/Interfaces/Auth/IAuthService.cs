@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EArenaTournamentManager.Application.Interfaces
+namespace EArenaTournamentManager.Application.Services.Interfaces.Auth
 {
     public interface IAuthService
     {

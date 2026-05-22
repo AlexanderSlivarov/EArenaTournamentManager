@@ -23,14 +23,18 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
             _dbSet = context.Set<T>();
         }
 
+        public virtual IQueryable<T> AsQueryable()
+            => _dbSet.Where(entity => entity.IsActive);
+
+
         public virtual async Task<IEnumerable<T>> GetAllAsync(bool isActive = true)
             => await SoftDeleteQuery(_dbSet, isActive).ToListAsync();
 
         public virtual async Task<T?> GetByIdAsync(int id)
             => await SoftDeleteQuery(_dbSet, true).FirstOrDefaultAsync(entity => entity.Id == id);
 
-        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, bool isActive = true)
-            => await SoftDeleteQuery(_dbSet, isActive).Where(predicate).ToListAsync();
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> filter, bool isActive = true)
+            => await SoftDeleteQuery(_dbSet, isActive).Where(filter).ToListAsync();
 
 
         public virtual async Task InsertAsync(T entity)
@@ -79,9 +83,10 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
 
             if (entry.State is not EntityState.Deleted)
             {
-                _dbSet.Attach(entity);
+                entry.State = EntityState.Deleted;
             }
 
+            _dbSet.Attach(entity);
             _dbSet.Remove(entity);
         }
 

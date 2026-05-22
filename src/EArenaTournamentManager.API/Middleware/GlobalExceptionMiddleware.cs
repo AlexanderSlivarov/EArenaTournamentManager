@@ -1,4 +1,5 @@
-﻿using EArenaTournamentManager.Application.Common.Results;
+﻿using EArenaTournamentManager.Application.Common.Extensions;
+using EArenaTournamentManager.Application.Common.Results;
 using System.Net;
 using System.Text.Json;
 
@@ -19,25 +20,17 @@ namespace EArenaTournamentManager.API.Middleware
             {
                 await _next(context);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
                 context.Response.ContentType = "application/json";
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var response = ServiceResult<string>.Failure(
+                var response = ServiceResultExtensions.Failure<string>(
                     null,
-                    new List<Error>
-                    {
-                        new Error
-                        {
-                            Key = "Server",
-                            Messages = new List<string>
-                            {
-                                exception.Message
-                            }
-                        }
-                    });
+                    "Server",
+                    ex.Message 
+                );
 
                 var jsonResponse = JsonSerializer.Serialize(response);
 

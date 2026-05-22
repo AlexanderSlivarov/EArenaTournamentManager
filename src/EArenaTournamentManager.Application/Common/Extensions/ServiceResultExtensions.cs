@@ -25,5 +25,27 @@ namespace EArenaTournamentManager.Application.Common.Extensions
 
             return ServiceResult<T>.Failure(data, errorList);
         }
+
+        public static ServiceResult<T> Failure<T>(
+            T? data,
+            string key,
+            List<string> messages)
+        {
+            var errors = new List<Error>
+            {
+               new Error
+               {
+                   Key = key,
+                   Messages = messages
+               }
+            };
+
+            return ServiceResult<T>.Failure(data, errors);
+        }
+
+        public static ServiceResult<T> Failure<T>(T? data, string key, string message)
+        {
+            return Failure<T>(data, key, new List<string> { message });
+        }
     }
 }

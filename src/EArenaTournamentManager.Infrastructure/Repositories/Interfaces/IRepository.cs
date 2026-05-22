@@ -10,11 +10,11 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Interfaces
 {
     public interface IRepository<T> where T : BaseEntity
     {
+        IQueryable<T> AsQueryable();
+
         Task<IEnumerable<T>> GetAllAsync(bool isActive = true);
-
         Task<T?> GetByIdAsync(int id);
-
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, bool isActive = true);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> filter, bool isActive = true);
 
         Task InsertAsync(T entity);
         void Update(T entity, params string[] excludingProperties);

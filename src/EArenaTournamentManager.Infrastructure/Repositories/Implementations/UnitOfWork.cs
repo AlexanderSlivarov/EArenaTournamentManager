@@ -26,10 +26,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "An instance of DbContext is required to use this repository!");
         }
-
-        public EArenaAppDbContext Context
-            => _context;
-
+        
         public IUserRepository Users
             => _users ??= new UserRepository(_context);
 
@@ -58,7 +55,10 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
             => await _context.SaveChangesAsync();
 
         public void Dispose()
-            => Dispose(true);
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         protected void Dispose(bool isDisposing)
         {
