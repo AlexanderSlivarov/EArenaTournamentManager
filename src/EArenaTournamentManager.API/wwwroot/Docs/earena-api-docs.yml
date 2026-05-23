@@ -1,0 +1,1826 @@
+openapi: 3.0.4
+info:
+  title: EArena Tournament Manager API
+  version: "1.0"
+  description: >
+    REST API for the EArena Tournament Manager platform.
+    Supports user authentication, tournament management, team management,
+    organization management, and participant registration.
+  contact:
+    name: EArena Support
+
+servers:
+  - url: http://localhost:5001
+    description: Local development (Docker)
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth   
+  - name: Users   
+  - name: Games    
+  - name: Organizations 
+  - name: OrganizationStaff 
+  - name: Teams   
+  - name: TeamMembers   
+  - name: Tournaments
+  - name: TournamentParticipants   
+
+paths:
+
+  # ─── AUTH ───────────────────────────────────────────────────────────────────
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: Creates a new user account. No authentication required.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+            example:
+              username: "player123"
+              email: "player@example.com"
+              password: "SecurePass!1"
+              avatarImageUrl: "https://example.com/avatar.png"
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error (missing fields, invalid email, weak password)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultError'
+        '409':
+          description: Username or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultError'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      description: Authenticates a user and returns a Bearer token for subsequent requests.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "player123"
+              password: "SecurePass!1"
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Missing username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultError'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultError'
+
+  # ─── USERS ──────────────────────────────────────────────────────────────────
+
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Get all users
+      description: Returns a paginated list of users. Requires Admin role.
+      parameters:
+        - name: Username
+          in: query
+          description: Filter by username (partial match)
+          schema:
+            type: string
+        - name: Role
+          in: query
+          description: Filter by user role
+          schema:
+            $ref: '#/components/schemas/UserRole'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Users]
+      summary: Create a user
+      description: Creates a new user with a specified role. Requires Admin role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultUser'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Users]
+      summary: Update user
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Users]
+      summary: Delete user
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: User deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── GAMES ──────────────────────────────────────────────────────────────────
+
+  /api/games:
+    get:
+      tags: [Games]
+      summary: Get all games
+      description: Returns a paginated list of games. Filterable by name and platform.
+      security: []
+      parameters:
+        - name: Name
+          in: query
+          description: Filter by game name (partial match)
+          schema:
+            type: string
+        - name: Platform
+          in: query
+          description: Filter by platform
+          schema:
+            $ref: '#/components/schemas/Platform'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of games
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedGameResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Games]
+      summary: Create a game
+      description: |
+        Adds a new game to the catalog.
+        **Validations:**
+        - `name` is required, max 100 characters
+        - `platform` must be a valid Platform enum value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+            example:
+              name: "League of Legends"
+              description: "A 5v5 MOBA game"
+              imageUrl: "https://example.com/lol.png"
+              platform: "PC"
+      responses:
+        '200':
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultGame'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/games/{id}:
+    get:
+      tags: [Games]
+      summary: Get game by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Game found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultGame'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Games]
+      summary: Update game
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameRequest'
+      responses:
+        '200':
+          description: Game updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultGame'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Games]
+      summary: Delete game
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Game deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── ORGANIZATIONS ───────────────────────────────────────────────────────────
+
+  /api/organizations:
+    get:
+      tags: [Organizations]
+      summary: Get all organizations
+      security: []
+      parameters:
+        - name: Name
+          in: query
+          schema:
+            type: string
+        - name: Type
+          in: query
+          schema:
+            $ref: '#/components/schemas/OrganizationType'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOrganizationResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Organizations]
+      summary: Create an organization
+      description: |
+        **Validations:**
+        - `name` is required, max 100 characters
+        - `type` must be a valid OrganizationType enum value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+      responses:
+        '200':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganization'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/organizations/{id}:
+    get:
+      tags: [Organizations]
+      summary: Get organization by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Organization found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganization'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Organizations]
+      summary: Update organization
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+      responses:
+        '200':
+          description: Organization updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganization'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Organizations]
+      summary: Delete organization
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Organization deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── ORGANIZATION STAFF ──────────────────────────────────────────────────────
+
+  /api/organization-staff:
+    get:
+      tags: [OrganizationStaff]
+      summary: Get all organization staff
+      parameters:
+        - name: OrganizationId
+          in: query
+          schema:
+            type: integer
+        - name: UserId
+          in: query
+          schema:
+            type: integer
+        - name: Role
+          in: query
+          schema:
+            $ref: '#/components/schemas/OrganizationStaffRole'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of organization staff
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOrganizationStaffResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [OrganizationStaff]
+      summary: Add staff member
+      description: |
+        **Validations:**
+        - `organizationId` must reference an existing organization
+        - `userId` must reference an existing user
+        - `role` must be a valid OrganizationStaffRole enum value
+        - A user cannot be added to the same organization twice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationStaffRequest'
+      responses:
+        '200':
+          description: Staff member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganizationStaff'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/organization-staff/{id}:
+    get:
+      tags: [OrganizationStaff]
+      summary: Get staff member by ID
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Staff member found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganizationStaff'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [OrganizationStaff]
+      summary: Update staff member
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationStaffRequest'
+      responses:
+        '200':
+          description: Staff member updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultOrganizationStaff'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [OrganizationStaff]
+      summary: Remove staff member
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Staff member removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── TEAMS ───────────────────────────────────────────────────────────────────
+
+  /api/teams:
+    get:
+      tags: [Teams]
+      summary: Get all teams
+      security: []
+      parameters:
+        - name: Name
+          in: query
+          schema:
+            type: string
+        - name: CaptainId
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTeamResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Teams]
+      summary: Create a team
+      description: |
+        **Validations:**
+        - `name` is required, max 100 characters
+        - `captainId` must reference an existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '200':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeam'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/teams/{id}:
+    get:
+      tags: [Teams]
+      summary: Get team by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Team found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeam'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Teams]
+      summary: Update team
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequest'
+      responses:
+        '200':
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeam'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Teams]
+      summary: Delete team
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Team deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── TEAM MEMBERS ────────────────────────────────────────────────────────────
+
+  /api/team-members:
+    get:
+      tags: [TeamMembers]
+      summary: Get all team members
+      parameters:
+        - name: UserId
+          in: query
+          schema:
+            type: integer
+        - name: TeamId
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of team members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTeamMemberResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [TeamMembers]
+      summary: Add team member
+      description: |
+        **Validations:**
+        - `teamId` must reference an existing team
+        - `userId` must reference an existing user
+        - A user cannot be added to the same team twice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamMemberRequest'
+      responses:
+        '200':
+          description: Member added to team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeamMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/team-members/{id}:
+    get:
+      tags: [TeamMembers]
+      summary: Get team member by ID
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Team member found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeamMember'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [TeamMembers]
+      summary: Update team member
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamMemberRequest'
+      responses:
+        '200':
+          description: Team member updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTeamMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [TeamMembers]
+      summary: Remove team member
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Member removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── TOURNAMENTS ─────────────────────────────────────────────────────────────
+
+  /api/tournaments:
+    get:
+      tags: [Tournaments]
+      summary: Get all tournaments
+      security: []
+      parameters:
+        - name: GameId
+          in: query
+          schema:
+            type: integer
+        - name: OrganizationId
+          in: query
+          schema:
+            type: integer
+        - name: Name
+          in: query
+          schema:
+            type: string
+        - name: Status
+          in: query
+          schema:
+            $ref: '#/components/schemas/RegistrationStatus'
+        - name: Region
+          in: query
+          schema:
+            type: string
+        - name: Format
+          in: query
+          schema:
+            type: string
+        - name: DateFrom
+          in: query
+          description: Unix timestamp (seconds)
+          schema:
+            type: integer
+            format: int64
+        - name: DateTo
+          in: query
+          description: Unix timestamp (seconds)
+          schema:
+            type: integer
+            format: int64
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of tournaments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTournamentResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Tournaments]
+      summary: Create a tournament
+      description: |
+        **Validations:**
+        - `name` is required, max 100 characters
+        - `gameId` must reference an existing game
+        - `organizationId` must reference an existing organization
+        - `dateTime` must be a future Unix timestamp (seconds)
+        - `status` must be a valid RegistrationStatus enum value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentRequest'
+            example:
+              gameId: 1
+              organizationId: 1
+              name: "Spring Championship 2025"
+              format: "Single Elimination"
+              map: "Summoner's Rift"
+              region: "EU West"
+              rules: "Standard competitive rules apply."
+              prizes: "1st: $500, 2nd: $200, 3rd: $100"
+              dateTime: 1748000000
+              status: "Open"
+      responses:
+        '200':
+          description: Tournament created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournament'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tournaments/{id}:
+    get:
+      tags: [Tournaments]
+      summary: Get tournament by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Tournament found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournament'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Tournaments]
+      summary: Update tournament
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentRequest'
+      responses:
+        '200':
+          description: Tournament updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournament'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Tournaments]
+      summary: Delete tournament
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Tournament deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── TOURNAMENT PARTICIPANTS ──────────────────────────────────────────────────
+
+  /api/tournament-participants:
+    get:
+      tags: [TournamentParticipants]
+      summary: Get all tournament participants
+      security: []
+      parameters:
+        - name: TournamentId
+          in: query
+          schema:
+            type: integer
+        - name: TeamId
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/OrderByParam'
+        - $ref: '#/components/parameters/SortAscParam'
+      responses:
+        '200':
+          description: Paginated list of tournament participants
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTournamentParticipantResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [TournamentParticipants]
+      summary: Register team for tournament
+      description: |
+        **Validations:**
+        - `tournamentId` must reference an existing tournament
+        - `teamId` must reference an existing team
+        - Tournament must have status `Open` to accept registrations
+        - A team cannot register for the same tournament twice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentParticipantRequest'
+      responses:
+        '200':
+          description: Team registered for tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournamentParticipant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tournament-participants/{id}:
+    get:
+      tags: [TournamentParticipants]
+      summary: Get participant by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Participant found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournamentParticipant'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [TournamentParticipants]
+      summary: Update participant
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentParticipantRequest'
+      responses:
+        '200':
+          description: Participant updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResultTournamentParticipant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [TournamentParticipants]
+      summary: Remove participant
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Participant removed
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ─── COMPONENTS ───────────────────────────────────────────────────────────────
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/login
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Resource ID
+      schema:
+        type: integer
+        format: int32
+    PageParam:
+      name: Page
+      in: query
+      description: Page number (1-based)
+      schema:
+        type: integer
+        format: int32
+        default: 1
+        minimum: 1
+    PageSizeParam:
+      name: PageSize
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        minimum: 1
+        maximum: 100
+    OrderByParam:
+      name: OrderBy
+      in: query
+      description: Field name to sort by
+      schema:
+        type: string
+    SortAscParam:
+      name: SortAsc
+      in: query
+      description: Sort ascending if true, descending if false
+      schema:
+        type: boolean
+        default: true
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceResultError'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceResultError'
+    NotFound:
+      description: Entity not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceResultError'
+    BadRequest:
+      description: Business logic error or validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceResultError'
+    InternalServerError:
+      description: Unhandled server exception
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceResultError'
+
+  schemas:
+
+    # ── Enums ──────────────────────────────────────────────────────────────────
+
+    Platform:
+      type: string
+      enum: [PC, PlayStation4, XBoxOne, Mobile, Switch, CrossPlatform]
+      description: Gaming platform
+
+    OrganizationType:
+      type: string
+      enum: [Personal, Business]
+      description: Type of organization
+
+    OrganizationStaffRole:
+      type: string
+      enum: [Owner, Admin, Moderator, BracketManager]
+      description: Role of a staff member within an organization
+
+    UserRole:
+      type: string
+      enum: [Member, Organizer, Admin]
+      description: System-wide role of a user
+
+    RegistrationStatus:
+      type: string
+      enum: [Open, Closed, Cancelled]
+      description: Registration status of a tournament
+
+    # ── Shared ─────────────────────────────────────────────────────────────────
+
+    Error:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Error category key (e.g. GameNameValidation, Global)
+        messages:
+          type: array
+          items:
+            type: string
+          description: List of error messages for this key
+
+    ServiceResultError:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+          example: false
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+
+    PagerResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        count:
+          type: integer
+          description: Total number of records matching the filter
+
+    # ── Auth ───────────────────────────────────────────────────────────────────
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          description: Required. Registered username.
+        password:
+          type: string
+          format: password
+          description: Required. Account password.
+
+    RegisterUserRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9_]{3,20}$'
+          description: 3-20 characters, letters/numbers/underscores only
+        email:
+          type: string
+          format: email
+          description: Valid email address
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 20
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,20}$'
+          description: 8-20 characters, must include uppercase, lowercase, number, and special character
+        avatarImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Optional. Must be a valid absolute URL if provided.
+
+    AuthResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            username:
+              type: string
+            email:
+              type: string
+            token:
+              type: string
+              description: JWT Bearer token
+        errors:
+          nullable: true
+
+    # ── Users ──────────────────────────────────────────────────────────────────
+
+    UserRequest:
+      type: object
+      required: [username, email, role]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9_]{3,20}$'
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 20
+          nullable: true
+          description: Optional on update. Required on create.
+        avatarImageUrl:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        avatarImageUrl:
+          type: string
+          nullable: true
+        role:
+          $ref: '#/components/schemas/UserRole'
+        isActive:
+          type: boolean
+        createdOn:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds)
+
+    ServiceResultUser:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/UserResponse'
+        errors:
+          nullable: true
+
+    PagedUserResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Games ──────────────────────────────────────────────────────────────────
+
+    GameRequest:
+      type: object
+      required: [name, platform]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        platform:
+          $ref: '#/components/schemas/Platform'
+
+    GameResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+        platform:
+          $ref: '#/components/schemas/Platform'
+
+    ServiceResultGame:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/GameResponse'
+        errors:
+          nullable: true
+
+    PagedGameResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/GameResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Organizations ──────────────────────────────────────────────────────────
+
+    OrganizationRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        logoImageUrl:
+          type: string
+          format: uri
+          nullable: true
+        headerImageUrl:
+          type: string
+          format: uri
+          nullable: true
+        type:
+          $ref: '#/components/schemas/OrganizationType'
+
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoImageUrl:
+          type: string
+          nullable: true
+        headerImageUrl:
+          type: string
+          nullable: true
+        type:
+          $ref: '#/components/schemas/OrganizationType'
+
+    ServiceResultOrganization:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/OrganizationResponse'
+        errors:
+          nullable: true
+
+    PagedOrganizationResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrganizationResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Organization Staff ─────────────────────────────────────────────────────
+
+    OrganizationStaffRequest:
+      type: object
+      required: [organizationId, userId, role]
+      properties:
+        organizationId:
+          type: integer
+          format: int32
+          minimum: 1
+        userId:
+          type: integer
+          format: int32
+          minimum: 1
+        role:
+          $ref: '#/components/schemas/OrganizationStaffRole'
+
+    OrganizationStaffResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organizationId:
+          type: integer
+        userId:
+          type: integer
+        role:
+          $ref: '#/components/schemas/OrganizationStaffRole'
+        joinedOn:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds)
+
+    ServiceResultOrganizationStaff:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/OrganizationStaffResponse'
+        errors:
+          nullable: true
+
+    PagedOrganizationStaffResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrganizationStaffResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Teams ──────────────────────────────────────────────────────────────────
+
+    TeamRequest:
+      type: object
+      required: [name, captainId]
+      properties:
+        captainId:
+          type: integer
+          format: int32
+          minimum: 1
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        logoImageUrl:
+          type: string
+          format: uri
+          nullable: true
+
+    TeamResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        captainId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        logoImageUrl:
+          type: string
+          nullable: true
+
+    ServiceResultTeam:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TeamResponse'
+        errors:
+          nullable: true
+
+    PagedTeamResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Team Members ───────────────────────────────────────────────────────────
+
+    TeamMemberRequest:
+      type: object
+      required: [userId, teamId]
+      properties:
+        userId:
+          type: integer
+          format: int32
+          minimum: 1
+        teamId:
+          type: integer
+          format: int32
+          minimum: 1
+        role:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: Optional. e.g. Support, IGL, Fragger
+
+    TeamMemberResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        teamId:
+          type: integer
+        role:
+          type: string
+          nullable: true
+        joinedOn:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds)
+
+    ServiceResultTeamMember:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TeamMemberResponse'
+        errors:
+          nullable: true
+
+    PagedTeamMemberResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamMemberResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Tournaments ────────────────────────────────────────────────────────────
+
+    TournamentRequest:
+      type: object
+      required: [name, gameId, organizationId, dateTime, status]
+      properties:
+        gameId:
+          type: integer
+          format: int32
+          minimum: 1
+        organizationId:
+          type: integer
+          format: int32
+          minimum: 1
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        format:
+          type: string
+          maxLength: 100
+          nullable: true
+        map:
+          type: string
+          maxLength: 100
+          nullable: true
+        region:
+          type: string
+          maxLength: 100
+          nullable: true
+        rules:
+          type: string
+          maxLength: 2000
+          nullable: true
+        prizes:
+          type: string
+          maxLength: 1000
+          nullable: true
+        dateTime:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds). Must be a future date.
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+
+    TournamentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        gameId:
+          type: integer
+        organizationId:
+          type: integer
+        name:
+          type: string
+        format:
+          type: string
+          nullable: true
+        map:
+          type: string
+          nullable: true
+        region:
+          type: string
+          nullable: true
+        rules:
+          type: string
+          nullable: true
+        prizes:
+          type: string
+          nullable: true
+        dateTime:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+
+    ServiceResultTournament:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TournamentResponse'
+        errors:
+          nullable: true
+
+    PagedTournamentResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TournamentResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true
+
+    # ── Tournament Participants ────────────────────────────────────────────────
+
+    TournamentParticipantRequest:
+      type: object
+      required: [tournamentId, teamId]
+      properties:
+        tournamentId:
+          type: integer
+          format: int32
+          minimum: 1
+        teamId:
+          type: integer
+          format: int32
+          minimum: 1
+
+    TournamentParticipantResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        tournamentId:
+          type: integer
+        teamId:
+          type: integer
+        joinedOn:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds)
+
+    ServiceResultTournamentParticipant:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TournamentParticipantResponse'
+        errors:
+          nullable: true
+
+    PagedTournamentParticipantResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TournamentParticipantResponse'
+            pager:
+              $ref: '#/components/schemas/PagerResponse'
+        errors:
+          nullable: true

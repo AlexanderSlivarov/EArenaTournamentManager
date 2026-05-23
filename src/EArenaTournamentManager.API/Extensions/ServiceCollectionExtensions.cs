@@ -16,11 +16,14 @@ using EArenaTournamentManager.Application.Services.Interfaces.Teams;
 using EArenaTournamentManager.Application.Services.Interfaces.TournamentParticipants;
 using EArenaTournamentManager.Application.Services.Interfaces.Tournaments;
 using EArenaTournamentManager.Application.Services.Interfaces.Users;
+using EArenaTournamentManager.Application.Validators.Auth;
 using EArenaTournamentManager.Infrastructure.Persistence;
 using EArenaTournamentManager.Infrastructure.Repositories.Implementations;
 using EArenaTournamentManager.Infrastructure.Repositories.Interfaces;
 using EArenaTournamentManager.Infrastructure.Security.Implementations;
 using EArenaTournamentManager.Infrastructure.Security.Interfaces;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -88,12 +91,30 @@ namespace EArenaTournamentManager.API.Extensions
             return services;
         }
 
+        public static IServiceCollection AddCorsPolicy(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontEnd", policy =>
+                    policy.WithOrigins("http://localhost:5000")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+            });
+
+            return services;
+        }
+
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDatabaseServices(configuration);
             services.AddRepositories();
             services.AddAuthServices(configuration);
             services.AddCoreServices();
+
+            services.AddFluentValidationAutoValidation();
+            services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
+
+            services.AddCorsPolicy();
 
             return services;
         }

@@ -16,8 +16,12 @@ namespace EArenaTournamentManager.Application.Services.Implementations.Users
 {
     public class UserService : BaseService<User>, IUserService
     {
-        public UserService(IUnitOfWork unitOfWork) : base(unitOfWork)
-        { }   
+        private readonly IPasswordHasher _passwordHasher;
+
+        public UserService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher) : base(unitOfWork)
+        {
+            _passwordHasher = passwordHasher;
+        }   
         
         protected override IRepository<User> GetRepository() => _unitOfWork.Users;
 
@@ -50,7 +54,12 @@ namespace EArenaTournamentManager.Application.Services.Implementations.Users
                     "EmailValidation",
                     "Email already exists."
                 );
-            }           
+            }
+
+            if (!string.IsNullOrEmpty(entity.PasswordHash))
+            {
+                entity.PasswordHash = _passwordHasher.HashPassword(entity.PasswordHash);
+            }
 
             return await base.SaveAsync(entity);
         }

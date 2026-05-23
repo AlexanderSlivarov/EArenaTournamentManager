@@ -3,13 +3,48 @@ using EArenaTournamentManager.API.Middleware;
 using EArenaTournamentManager.Infrastructure.Persistance.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+
+builder.WebHost.UseWebRoot("wwwroot");
+
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/openapi/earena-api-docs.yml", async context =>
+    {
+        var filePath = Path.Combine(
+            app.Environment.WebRootPath!,
+            "Docs",
+            "earena-api-docs.yml");
+
+        if (!File.Exists(filePath))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsync("OpenAPI document not found.");
+            return;
+        }
+
+        context.Response.ContentType = "application/yaml";
+        await context.Response.SendFileAsync(filePath);
+    });
+
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/openapi/earena-api-docs.yml", "EArenaTournamentManager API V1");
+        c.RoutePrefix = "swagger";
+    });
+}
 
 var retries = 5;
 while (retries > 0)
@@ -33,14 +68,10 @@ while (retries > 0)
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
