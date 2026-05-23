@@ -148,6 +148,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserRequest'
+            example:
+              username: "newplayer99"
+              email: "newplayer@example.com"
+              password: "StrongPass!2"
+              avatarImageUrl: "https://example.com/avatars/newplayer.png"
+              role: "Member"
       responses:
         '200':
           description: User created
@@ -192,6 +198,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserRequest'
+            example:
+              username: "newplayer99"
+              email: "updated@example.com"
+              password: "NewStrongPass!3"
+              avatarImageUrl: "https://example.com/avatars/updated.png"
+              role: "Organizer"
       responses:
         '200':
           description: User updated
@@ -224,8 +236,7 @@ paths:
     get:
       tags: [Games]
       summary: Get all games
-      description: Returns a paginated list of games. Filterable by name and platform.
-      security: []
+      description: Returns a paginated list of games. Filterable by name and platform.     
       parameters:
         - name: Name
           in: query
@@ -286,8 +297,7 @@ paths:
   /api/games/{id}:
     get:
       tags: [Games]
-      summary: Get game by ID
-      security: []
+      summary: Get game by ID      
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -312,6 +322,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GameRequest'
+            example:
+              name: "League of Legends"
+              description: "Updated description for the 5v5 MOBA game"
+              imageUrl: "https://example.com/lol-updated.png"
+              platform: "PC"
       responses:
         '200':
           description: Game updated
@@ -343,8 +358,7 @@ paths:
   /api/organizations:
     get:
       tags: [Organizations]
-      summary: Get all organizations
-      security: []
+      summary: Get all organizations      
       parameters:
         - name: Name
           in: query
@@ -380,6 +394,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrganizationRequest'
+            example:
+              name: "Alpha Esports"
+              description: "A professional esports organization based in EU."
+              logoImageUrl: "https://example.com/logos/alpha-esports.png"
+              headerImageUrl: "https://example.com/headers/alpha-esports.png"
+              type: "Business"
       responses:
         '200':
           description: Organization created
@@ -397,8 +417,7 @@ paths:
   /api/organizations/{id}:
     get:
       tags: [Organizations]
-      summary: Get organization by ID
-      security: []
+      summary: Get organization by ID      
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -423,6 +442,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrganizationRequest'
+            example:
+              name: "Alpha Esports"
+              description: "Updated description for Alpha Esports organization."
+              logoImageUrl: "https://example.com/logos/alpha-esports-v2.png"
+              headerImageUrl: "https://example.com/headers/alpha-esports-v2.png"
+              type: "Business"
       responses:
         '200':
           description: Organization updated
@@ -451,7 +476,7 @@ paths:
 
   # ─── ORGANIZATION STAFF ──────────────────────────────────────────────────────
 
-  /api/organization-staff:
+  /api/organizationstaff:
     get:
       tags: [OrganizationStaff]
       summary: Get all organization staff
@@ -496,6 +521,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrganizationStaffRequest'
+            example:
+              organizationId: 1
+              userId: 5
+              role: "Admin"
       responses:
         '200':
           description: Staff member added
@@ -510,7 +539,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/organization-staff/{id}:
+  /api/organizationstaff/{id}:
     get:
       tags: [OrganizationStaff]
       summary: Get staff member by ID
@@ -538,6 +567,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrganizationStaffRequest'
+            example:
+              organizationId: 1
+              userId: 5
+              role: "Moderator"
       responses:
         '200':
           description: Staff member updated
@@ -569,8 +602,7 @@ paths:
   /api/teams:
     get:
       tags: [Teams]
-      summary: Get all teams
-      security: []
+      summary: Get all teams      
       parameters:
         - name: Name
           in: query
@@ -606,6 +638,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TeamRequest'
+            example:
+              captainId: 3
+              name: "Shadow Wolves"
+              description: "A competitive team focused on tactical shooters."
+              logoImageUrl: "https://example.com/logos/shadow-wolves.png"
       responses:
         '200':
           description: Team created
@@ -623,8 +660,7 @@ paths:
   /api/teams/{id}:
     get:
       tags: [Teams]
-      summary: Get team by ID
-      security: []
+      summary: Get team by ID      
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -649,6 +685,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TeamRequest'
+            example:
+              captainId: 3
+              name: "Shadow Wolves"
+              description: "Updated team description with new strategy focus."
+              logoImageUrl: "https://example.com/logos/shadow-wolves-v2.png"
       responses:
         '200':
           description: Team updated
@@ -677,7 +718,7 @@ paths:
 
   # ─── TEAM MEMBERS ────────────────────────────────────────────────────────────
 
-  /api/team-members:
+  /api/teammembers:
     get:
       tags: [TeamMembers]
       summary: Get all team members
@@ -717,6 +758,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TeamMemberRequest'
+            example:
+              userId: 7
+              teamId: 2
+              role: "IGL"
       responses:
         '200':
           description: Member added to team
@@ -731,7 +776,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/team-members/{id}:
+  /api/teammembers/{id}:
     get:
       tags: [TeamMembers]
       summary: Get team member by ID
@@ -759,6 +804,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TeamMemberRequest'
+            example:
+              userId: 7
+              teamId: 2
+              role: "Support"
       responses:
         '200':
           description: Team member updated
@@ -790,8 +839,7 @@ paths:
   /api/tournaments:
     get:
       tags: [Tournaments]
-      summary: Get all tournaments
-      security: []
+      summary: Get all tournaments      
       parameters:
         - name: GameId
           in: query
@@ -886,8 +934,7 @@ paths:
   /api/tournaments/{id}:
     get:
       tags: [Tournaments]
-      summary: Get tournament by ID
-      security: []
+      summary: Get tournament by ID      
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -912,6 +959,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TournamentRequest'
+            example:
+              gameId: 1
+              organizationId: 1
+              name: "Spring Championship 2025"
+              format: "Double Elimination"
+              map: "Summoner's Rift"
+              region: "EU West"
+              rules: "Updated competitive rules apply. No substitutions after round 2."
+              prizes: "1st: $750, 2nd: $300, 3rd: $150"
+              dateTime: 1748500000
+              status: "Closed"
       responses:
         '200':
           description: Tournament updated
@@ -940,11 +998,10 @@ paths:
 
   # ─── TOURNAMENT PARTICIPANTS ──────────────────────────────────────────────────
 
-  /api/tournament-participants:
+  /api/tournamentparticipants:
     get:
       tags: [TournamentParticipants]
-      summary: Get all tournament participants
-      security: []
+      summary: Get all tournament participants      
       parameters:
         - name: TournamentId
           in: query
@@ -982,6 +1039,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TournamentParticipantRequest'
+            example:
+              tournamentId: 4
+              teamId: 2
       responses:
         '200':
           description: Team registered for tournament
@@ -996,11 +1056,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /api/tournament-participants/{id}:
+  /api/tournamentparticipants/{id}:
     get:
       tags: [TournamentParticipants]
-      summary: Get participant by ID
-      security: []
+      summary: Get participant by ID      
       parameters:
         - $ref: '#/components/parameters/IdParam'
       responses:
@@ -1025,6 +1084,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TournamentParticipantRequest'
+            example:
+              tournamentId: 4
+              teamId: 3
       responses:
         '200':
           description: Participant updated

@@ -65,7 +65,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Games");
+                    b.ToTable("Games", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.Organization", b =>
@@ -115,7 +115,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.OrganizationStaff", b =>
@@ -163,7 +163,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("OrganizationId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("OrganizationStaff");
+                    b.ToTable("OrganizationStaff", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.Team", b =>
@@ -211,7 +211,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Teams");
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.TeamMember", b =>
@@ -258,7 +258,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("UserId", "TeamId")
                         .IsUnique();
 
-                    b.ToTable("TeamMembers");
+                    b.ToTable("TeamMembers", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.Tournament", b =>
@@ -326,7 +326,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("Tournaments");
+                    b.ToTable("Tournaments", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.TournamentParticipant", b =>
@@ -370,7 +370,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("TournamentId", "TeamId")
                         .IsUnique();
 
-                    b.ToTable("TournamentParticipants");
+                    b.ToTable("TournamentParticipants", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.User", b =>
@@ -425,7 +425,7 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("EArenaTournamentManager.Domain.Entities.OrganizationStaff", b =>
