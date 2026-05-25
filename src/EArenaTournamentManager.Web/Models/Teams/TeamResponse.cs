@@ -1,0 +1,11 @@
+﻿namespace EArenaTournamentManager.Web.Models.Teams
+{
+    public class TeamResponse
+    {
+        public int Id { get; set; }
+        public int CaptainId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? LogoImageUrl { get; set; }
+    }
+}

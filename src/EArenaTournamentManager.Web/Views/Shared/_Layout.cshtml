@@ -27,6 +27,38 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetString("Username") != null)
+                        {
+                            <li class="nav-item d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(Context.Session.GetString("Avatar")))
+                                {
+                                    <img src="@Context.Session.GetString("Avatar")"
+                                         alt="avatar"
+                                         style="width:32px; height:32px; border-radius:50%; object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <span style="width:32px; height:32px; border-radius:50%; background:#6c757d; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:14px;">
+                                        @Context.Session.GetString("Username")?[0].ToString().ToUpper()
+                                    </span>
+                                }
+                                <span class="nav-link text-dark">@Context.Session.GetString("Username")</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </nav>
