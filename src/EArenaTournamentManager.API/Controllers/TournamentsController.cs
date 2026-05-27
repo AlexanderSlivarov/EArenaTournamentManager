@@ -27,12 +27,15 @@ namespace EArenaTournamentManager.API.Controllers
             entity.GameId = model.GameId;
             entity.OrganizationId = model.OrganizationId;
             entity.Name = model.Name;
+            entity.LogoImageUrl = model.LogoImageUrl;
             entity.Format = model.Format;
             entity.Map = model.Map;
             entity.Region = model.Region;
             entity.Rules = model.Rules;
             entity.Prizes = model.Prizes;
-            entity.DateTime = model.DateTime;
+            entity.StartDate = model.StartDate;
+            entity.EndDate = model.EndDate;
+            entity.DateTime = model.StartDate;
             entity.Status = model.Status;
         }
 
@@ -60,10 +63,10 @@ namespace EArenaTournamentManager.API.Controllers
                     (t.Format != null && t.Format.Contains(model.Filter.Format))) &&
 
                 (!model.Filter.DateFrom.HasValue ||
-                    t.DateTime >= model.Filter.DateFrom.Value) &&
+                    (t.StartDate > 0 ? t.StartDate : t.DateTime) >= model.Filter.DateFrom.Value) &&
 
                 (!model.Filter.DateTo.HasValue ||
-                    t.DateTime <= model.Filter.DateTo.Value);
+                    (t.EndDate > 0 ? t.EndDate : t.DateTime) <= model.Filter.DateTo.Value);
         }
 
         protected override void PopulateGetResponse(TournamentGetRequest request, TournamentGetResponse response)
@@ -79,11 +82,14 @@ namespace EArenaTournamentManager.API.Controllers
                 GameId = entity.GameId,
                 OrganizationId = entity.OrganizationId,
                 Name = entity.Name,
+                LogoImageUrl = entity.LogoImageUrl,
                 Format = entity.Format,
                 Map = entity.Map,
                 Region = entity.Region,
                 Rules = entity.Rules,
                 Prizes = entity.Prizes,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
                 DateTime = entity.DateTime,
                 CreatedBy = entity.CreatedBy,
                 CreatedOn = entity.CreatedOn,

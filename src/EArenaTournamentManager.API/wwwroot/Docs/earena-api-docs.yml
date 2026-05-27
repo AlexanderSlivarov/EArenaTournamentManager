@@ -898,7 +898,8 @@ paths:
         - `name` is required, max 100 characters
         - `gameId` must reference an existing game
         - `organizationId` must reference an existing organization
-        - `dateTime` must be a future Unix timestamp (seconds)
+        - `startDate` must be a future Unix timestamp (seconds)
+        - `endDate` must be on or after `startDate`
         - `status` must be a valid RegistrationStatus enum value
       requestBody:
         required: true
@@ -915,7 +916,8 @@ paths:
               region: "EU West"
               rules: "Standard competitive rules apply."
               prizes: "1st: $500, 2nd: $200, 3rd: $100"
-              dateTime: 1748000000
+              startDate: 1748000000
+              endDate: 1748600000
               status: "Open"
       responses:
         '200':
@@ -968,7 +970,8 @@ paths:
               region: "EU West"
               rules: "Updated competitive rules apply. No substitutions after round 2."
               prizes: "1st: $750, 2nd: $300, 3rd: $150"
-              dateTime: 1748500000
+              startDate: 1748500000
+              endDate: 1749100000
               status: "Closed"
       responses:
         '200':
@@ -1224,7 +1227,7 @@ components:
 
     RegistrationStatus:
       type: string
-      enum: [Open, Closed, Cancelled]
+      enum: [Open, Upcoming, Closed, Cancelled]
       description: Registration status of a tournament
 
     # ── Shared ─────────────────────────────────────────────────────────────────
@@ -1731,7 +1734,7 @@ components:
 
     TournamentRequest:
       type: object
-      required: [name, gameId, organizationId, dateTime, status]
+      required: [name, gameId, organizationId, startDate, endDate, status]
       properties:
         gameId:
           type: integer
@@ -1745,9 +1748,13 @@ components:
           type: string
           minLength: 2
           maxLength: 100
+        logoImageUrl:
+          type: string
+          format: uri
+          nullable: true
         format:
           type: string
-          maxLength: 100
+          maxLength: 2000
           nullable: true
         map:
           type: string
@@ -1765,10 +1772,14 @@ components:
           type: string
           maxLength: 1000
           nullable: true
-        dateTime:
+        startDate:
           type: integer
           format: int64
           description: Unix timestamp (seconds). Must be a future date.
+        endDate:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds). Must be on or after the start date.
         status:
           $ref: '#/components/schemas/RegistrationStatus'
 
@@ -1783,6 +1794,9 @@ components:
           type: integer
         name:
           type: string
+        logoImageUrl:
+          type: string
+          nullable: true
         format:
           type: string
           nullable: true
@@ -1798,6 +1812,12 @@ components:
         prizes:
           type: string
           nullable: true
+        startDate:
+          type: integer
+          format: int64
+        endDate:
+          type: integer
+          format: int64
         dateTime:
           type: integer
           format: int64

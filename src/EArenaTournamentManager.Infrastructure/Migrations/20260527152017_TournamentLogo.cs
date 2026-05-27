@@ -5,25 +5,24 @@
 namespace EArenaTournamentManager.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class RemovePasswordSalt : Migration
+    public partial class TournamentLogo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PasswordSalt",
-                table: "Users");
+            migrationBuilder.AddColumn<string>(
+                name: "LogoImageUrl",
+                table: "Tournaments",
+                type: "nvarchar(max)",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "PasswordSalt",
-                table: "Users",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.DropColumn(
+                name: "LogoImageUrl",
+                table: "Tournaments");
         }
     }
 }

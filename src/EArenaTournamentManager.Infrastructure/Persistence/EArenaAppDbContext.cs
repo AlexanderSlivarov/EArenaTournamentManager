@@ -180,9 +180,12 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Name).IsRequired();
+                        entity.Property(t => t.LogoImageUrl).IsRequired(false);
                 entity.Property(t => t.Format).IsRequired();
                 entity.Property(t => t.Map).IsRequired(false);
                 entity.Property(t => t.Region).IsRequired();
+                entity.Property(t => t.StartDate).IsRequired();
+                entity.Property(t => t.EndDate).IsRequired();
                 entity.Property(t => t.DateTime).IsRequired();
                 entity.Property(t => t.Rules).IsRequired(false);
                 entity.Property(t => t.Prizes).IsRequired(false);

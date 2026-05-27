@@ -13,6 +13,6 @@ namespace EArenaTournamentManager.Domain.Enums
         XBoxOne = 2,
         Mobile = 3,
         Switch = 4,
-        CrossPlatform= 5
+        CrossPlatform = 5
     }
 }

@@ -70,12 +70,14 @@ namespace EArenaTournamentManager.Web.Controllers
                 GameId = result.Data.GameId,
                 OrganizationId = result.Data.OrganizationId,
                 Name = result.Data.Name,
+                LogoImageUrl = result.Data.LogoImageUrl,
                 Format = result.Data.Format,
                 Map = result.Data.Map,
                 Region = result.Data.Region,
                 Rules = result.Data.Rules,
                 Prizes = result.Data.Prizes,
-                DateTime = result.Data.DateTime,
+                StartDate = result.Data.StartDate,
+                EndDate = result.Data.EndDate,
                 Status = result.Data.Status
             };
             return View(request);

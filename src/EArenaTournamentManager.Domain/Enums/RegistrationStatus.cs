@@ -9,7 +9,8 @@ namespace EArenaTournamentManager.Domain.Enums
     public enum RegistrationStatus
     {
         Open = 0,
-        Closed = 1,
-        Cancelled = 2
+        Upcoming = 1,
+        Closed = 2,
+        Cancelled = 3
     }
 }

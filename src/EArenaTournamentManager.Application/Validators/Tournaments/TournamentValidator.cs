@@ -19,8 +19,12 @@ namespace EArenaTournamentManager.Application.Validators.Tournaments
                 .MinimumLength(2).WithMessage("Tournament name must be at least 2 characters long.")
                 .MaximumLength(100).WithMessage("Tournament name cannot exceed 100 characters.");
 
+            RuleFor(x => x.LogoImageUrl)
+                .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                .WithMessage("LogoImageUrl must be a valid URL if provided.");
+
             RuleFor(x => x.Format)
-                .MaximumLength(100).WithMessage("Format cannot exceed 100 characters.")
+                .MaximumLength(2000).WithMessage("Format cannot exceed 2000 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Format));
 
             RuleFor(x => x.Map)
@@ -39,12 +43,16 @@ namespace EArenaTournamentManager.Application.Validators.Tournaments
                 .MaximumLength(1000).WithMessage("Prizes cannot exceed 1000 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Prizes));
 
-            RuleFor(x => x.DateTime)
+            RuleFor(x => x.StartDate)
                 .GreaterThan(DateTimeOffset.UtcNow.ToUnixTimeSeconds())
-                .WithMessage("Tournament date must be in the future.");
+                .WithMessage("Tournament start date must be in the future.");
+
+            RuleFor(x => x.EndDate)
+                .GreaterThanOrEqualTo(x => x.StartDate)
+                .WithMessage("Tournament end date must be on or after the start date.");
 
             RuleFor(x => x.Status)
-                .IsInEnum().WithMessage("Invalid status. Valid values are: Open, Closed, Cancelled.");
+                .IsInEnum().WithMessage("Invalid status. Valid values are: Open, Upcoming, Closed, Cancelled.");
         }
     }
 }

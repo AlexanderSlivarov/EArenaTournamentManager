@@ -20,12 +20,20 @@ else
     <div class="row">
         @foreach (var tournament in Model)
         {
+            var startDate = tournament.StartDate > 0 ? tournament.StartDate : tournament.DateTime;
+            var endDate = tournament.EndDate > 0 ? tournament.EndDate : startDate;
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
+                        @if (!string.IsNullOrEmpty(tournament.LogoImageUrl))
+                        {
+                            <img src="@tournament.LogoImageUrl" alt="@tournament.Name logo"
+                                 class="img-thumbnail mb-3"
+                                 style="width:100%;max-height:180px;object-fit:cover;" />
+                        }
                         <h5 class="card-title">@tournament.Name</h5>
                         <p class="card-text">
-                            <span class="badge bg-@(tournament.Status == "Open" ? "success" : tournament.Status == "Closed" ? "secondary" : "danger")">
+                            <span class="badge bg-@(tournament.Status == "Upcoming" ? "warning" : tournament.Status == "Open" ? "success" : tournament.Status == "Closed" ? "secondary" : "danger")">
                                 @tournament.Status
                             </span>
                         </p>
@@ -39,7 +47,14 @@ else
                         }
                         <p class="card-text">
                             <small class="text-muted">
-                                Date: @(DateTimeOffset.FromUnixTimeSeconds(tournament.DateTime).ToString("dd MMM yyyy"))
+                                @if (endDate > startDate)
+                                {
+                                    <text>Dates: @DateTimeOffset.FromUnixTimeSeconds(startDate).ToString("dd MMM yyyy") - @DateTimeOffset.FromUnixTimeSeconds(endDate).ToString("dd MMM yyyy")</text>
+                                }
+                                else
+                                {
+                                    <text>Date: @DateTimeOffset.FromUnixTimeSeconds(startDate).ToString("dd MMM yyyy")</text>
+                                }
                             </small>
                         </p>
                         <p class="card-text"><small class="text-muted">Created: @((tournament.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(tournament.CreatedOn).ToLocalTime().ToString("dd MMM yyyy") : string.Empty)</small></p>

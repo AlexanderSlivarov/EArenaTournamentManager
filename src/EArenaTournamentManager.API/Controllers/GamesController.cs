@@ -39,7 +39,7 @@ namespace EArenaTournamentManager.API.Controllers
                     (g.Name != null && g.Name.Contains(model.Filter.Name))) &&
 
                 (!model.Filter.Platform.HasValue || 
-                    g.Platform == model.Filter.Platform.Value);
+                    ((g.Platform & model.Filter.Platform.Value) == model.Filter.Platform.Value));
         }
 
         protected override void PopulateGetResponse(GameGetRequest request, GameGetResponse response)

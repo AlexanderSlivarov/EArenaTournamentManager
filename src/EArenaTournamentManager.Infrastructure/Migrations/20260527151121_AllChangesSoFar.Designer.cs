@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EArenaTournamentManager.Infrastructure.Migrations
 {
     [DbContext(typeof(EArenaAppDbContext))]
-    [Migration("20260518210014_AddUserRole")]
-    partial class AddUserRole
+    [Migration("20260527151121_AllChangesSoFar")]
+    partial class AllChangesSoFar
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -281,6 +281,9 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     b.Property<long>("DateTime")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("EndDate")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Format")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -292,6 +295,9 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<string>("LogoImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Map")
                         .HasColumnType("nvarchar(max)");
@@ -312,6 +318,9 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
 
                     b.Property<string>("Rules")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("StartDate")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Status")
                         .IsRequired()
