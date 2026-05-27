@@ -13,5 +13,10 @@
         public string? Prizes { get; set; }
         public long DateTime { get; set; }
         public string Status { get; set; } = string.Empty;
+        public int CreatedBy { get; set; }
+        public long CreatedOn { get; set; }
+        public int? UpdatedBy { get; set; }
+        public long? UpdatedOn { get; set; }
+        public bool IsActive { get; set; }
     }
 }

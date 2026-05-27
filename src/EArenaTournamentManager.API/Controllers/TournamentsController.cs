@@ -38,7 +38,7 @@ namespace EArenaTournamentManager.API.Controllers
 
         protected override Expression<Func<Tournament, bool>>? GetFilter(TournamentGetRequest model)
         {
-            model.Filter = new TournamentGetFilterRequest();
+            model.Filter ??= new TournamentGetFilterRequest();
 
             return t =>
                (!model.Filter.GameId.HasValue ||
@@ -85,6 +85,11 @@ namespace EArenaTournamentManager.API.Controllers
                 Rules = entity.Rules,
                 Prizes = entity.Prizes,
                 DateTime = entity.DateTime,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                IsActive = entity.IsActive,
                 Status = entity.Status
             };
         }

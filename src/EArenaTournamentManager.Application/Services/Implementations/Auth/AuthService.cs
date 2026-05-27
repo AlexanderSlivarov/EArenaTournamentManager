@@ -31,9 +31,7 @@ namespace EArenaTournamentManager.Application.Services.Implementations.Auth
                 Email = request.Email,
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
                 AvatarImageUrl = request.AvatarImageUrl,
-                Role = UserRole.Member,
-                CreatedBy = 1,
-                CreatedOn = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                Role = UserRole.Member,                
             };
 
             var result = await _userService.SaveAsync(newUser);

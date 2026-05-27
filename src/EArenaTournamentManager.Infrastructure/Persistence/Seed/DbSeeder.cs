@@ -45,10 +45,7 @@ namespace EArenaTournamentManager.Infrastructure.Persistance.Seed
                 Username = username,
                 Email = email!,
                 PasswordHash = passwordHasher.HashPassword(password),
-                Role = UserRole.Admin,
-                CreatedBy = 0,
-                CreatedOn = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                IsActive = true
+                Role = UserRole.Admin,                
             };
 
             await unitOfWork.Users.InsertAsync(admin);

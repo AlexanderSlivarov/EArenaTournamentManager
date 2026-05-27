@@ -1,5 +1,61 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse>
 @{
+    ViewData["Title"] = "Organizations";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Organizations</h2>
+    @if (ViewBag.IsLoggedIn == true)
+    {
+        <a asp-action="Create" class="btn btn-primary">Create Organization</a>
+    }
+</div>
+@if (!Model.Any())
+{
+    <p class="text-muted">No organizations found.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var org in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(org.HeaderImageUrl))
+                    {
+                        <img src="@org.HeaderImageUrl" class="card-img-top"
+                             style="height:120px;object-fit:cover;" alt="@org.Name header" />
+                    }
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            @if (!string.IsNullOrEmpty(org.LogoImageUrl))
+                            {
+                                <img src="@org.LogoImageUrl" alt="@org.Name logo"
+                                     style="width:40px;height:40px;object-fit:cover;border-radius:50%;" />
+                            }
+                            <h5 class="card-title mb-0">@org.Name</h5>
+                        </div>
+                        <span class="badge bg-secondary mb-2">@org.Type</span>
+                        @if (!string.IsNullOrEmpty(org.Description))
+                        {
+                            <p class="card-text text-muted">@org.Description</p>
+                        }
+                        <p class="card-text"><small class="text-muted">Created: @((org.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(org.CreatedOn).ToLocalTime().ToString("dd MMM yyyy") : string.Empty)</small></p>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a asp-action="Details" asp-route-id="@org.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                        @if (ViewBag.IsLoggedIn == true)
+                        {
+                            <a asp-action="Edit" asp-route-id="@org.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@org.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Delete this organization?')">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }

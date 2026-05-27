@@ -1,5 +1,73 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EArenaTournamentManager.Web.Models.Users.UserResponse
 @{
+    ViewData["Title"] = Model.Username;
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        @if (!string.IsNullOrEmpty(Model.AvatarImageUrl))
+        {
+            <img src="@Model.AvatarImageUrl" alt="@Model.Username"
+                 style="width:72px;height:72px;object-fit:cover;border-radius:50%;" />
+        }
+        else
+        {
+            <span style="width:72px;height:72px;border-radius:50%;background:#6c757d;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:28px;">
+                @Model.Username[0].ToString().ToUpper()
+            </span>
+        }
+        <div>
+            <h2 class="mb-0">@Model.Username</h2>
+            <span class="badge bg-primary">@Model.Role</span>
+            @if (Model.IsActive)
+            {
+                <span class="badge bg-success ms-1">Active</span>
+            }
+            else
+            {
+                <span class="badge bg-danger ms-1">Inactive</span>
+            }
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+            <button type="submit" class="btn btn-outline-danger"
+                    onclick="return confirm('Delete this user?')">
+                Delete
+            </button>
+        </form>
+        <a asp-action="Index" class="btn btn-outline-primary">Back to list</a>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">User Info</h5>
+        <dl class="row">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            <dt class="col-sm-3">Joined</dt>
+            <dd class="col-sm-9">@DateTimeOffset.FromUnixTimeSeconds(Model.CreatedOn).ToString("dd MMM yyyy HH:mm")</dd>
+        </dl>
+    </div>
+</div>
+
+@if (ViewBag.IsAdmin == true)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Metadata</h5>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Created By</dt>
+                <dd class="col-sm-9">@Model.CreatedBy</dd>
+                <dt class="col-sm-3">Created On</dt>
+                <dd class="col-sm-9">@DateTimeOffset.FromUnixTimeSeconds(Model.CreatedOn).ToString("dd MMM yyyy HH:mm")</dd>
+                <dt class="col-sm-3">Updated By</dt>
+                <dd class="col-sm-9">@(Model.UpdatedBy.HasValue ? Model.UpdatedBy.Value.ToString() : "-")</dd>
+                <dt class="col-sm-3">Updated On</dt>
+                <dd class="col-sm-9">@(Model.UpdatedOn.HasValue ? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToString("dd MMM yyyy HH:mm") : "-")</dd>
+                <dt class="col-sm-3">Active</dt>
+                <dd class="col-sm-9">@(Model.IsActive ? "Yes" : "No")</dd>
+            </dl>
+        </div>
+    </div>
 }

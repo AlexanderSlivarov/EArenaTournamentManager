@@ -15,6 +15,11 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Organizations
         public string? Description { get; set; }
         public string? LogoImageUrl { get; set; }
         public string? HeaderImageUrl { get; set; }
+        public int CreatedBy { get; set; }
+        public long CreatedOn { get; set; }
+        public int? UpdatedBy { get; set; }
+        public long? UpdatedOn { get; set; }
+        public bool IsActive { get; set; }
 
         public OrganizationType? Type { get; set; }
         public string TypeName => Type.ToString()!;

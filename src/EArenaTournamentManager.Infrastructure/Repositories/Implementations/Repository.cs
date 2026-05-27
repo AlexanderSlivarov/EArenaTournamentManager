@@ -1,12 +1,14 @@
 ﻿using EArenaTournamentManager.Domain.Common;
 using EArenaTournamentManager.Infrastructure.Persistence;
 using EArenaTournamentManager.Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,15 +19,23 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
         protected readonly EArenaAppDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public Repository(EArenaAppDbContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public Repository(EArenaAppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context), "An instance of DbContext is required to use this repository!");
             _dbSet = context.Set<T>();
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var claim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
+            return int.TryParse(claim?.Value, out var id) ? id: 0;
         }
 
         public virtual IQueryable<T> AsQueryable()
             => _dbSet.Where(entity => entity.IsActive);
-
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(bool isActive = true)
             => await SoftDeleteQuery(_dbSet, isActive).ToListAsync();
@@ -39,7 +49,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
 
         public virtual async Task InsertAsync(T entity)
         {
-            entity.CreatedBy = 1;
+            entity.CreatedBy = GetCurrentUserId();
             entity.CreatedOn = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             entity.IsActive = true;
 
@@ -57,6 +67,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
 
         public virtual void Update(T entity, params string[] excludingProperties)
         {
+            entity.UpdatedBy = GetCurrentUserId();
             entity.UpdatedOn = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             EntityEntry<T> entry = _context.Entry(entity);
@@ -109,6 +120,5 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
 
             return query;
         }
-
     }
 }

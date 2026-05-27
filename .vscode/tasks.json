@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build-web",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"src/EArenaTournamentManager.Web/EArenaTournamentManager.Web.csproj"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		}
+	]
+}

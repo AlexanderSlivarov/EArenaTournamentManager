@@ -1,5 +1,54 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<EArenaTournamentManager.Web.Models.Games.GameResponse>
 @{
+    ViewData["Title"] = "Games";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Games</h2>
+    @if (ViewBag.IsLoggedIn == true)
+    {
+        <a asp-action="Create" class="btn btn-primary">Add Game</a>
+    }
+</div>
+@if (!Model.Any())
+{
+    <p class="text-muted">No games found.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var game in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(game.ImageUrl))
+                    {
+                        <img src="@game.ImageUrl" class="card-img-top"
+                             style="height:140px;object-fit:cover;" alt="@game.Name" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@game.Name</h5>
+                        <span class="badge bg-secondary mb-2">@game.Platform</span>
+                        @if (!string.IsNullOrEmpty(game.Description))
+                        {
+                            <p class="card-text text-muted small">@game.Description</p>
+                        }
+                        <p class="card-text"><small class="text-muted">Created: @((game.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(game.CreatedOn).ToLocalTime().ToString("dd MMM yyyy") : string.Empty)</small></p>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a asp-action="Details" asp-route-id="@game.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                        @if (ViewBag.IsLoggedIn == true)
+                        {
+                            <a asp-action="Edit" asp-route-id="@game.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@game.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Delete this game?')">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }

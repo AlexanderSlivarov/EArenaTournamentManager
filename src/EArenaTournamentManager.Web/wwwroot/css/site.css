@@ -21,6 +21,94 @@ body {
   margin-bottom: 60px;
 }
 
+.letter-spacing {
+  letter-spacing: 0.16em;
+}
+
+.notfound-shell {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.notfound-accent {
+  height: 6px;
+  background: linear-gradient(90deg, #0d6efd 0%, #20c997 55%, #6f42c1 100%);
+}
+
+.notfound-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+
+.notfound-stat {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.notfound-stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6c757d;
+  margin-bottom: 0.35rem;
+}
+
+.notfound-stat-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.notfound-stat-text {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.app-navbar {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #111827 100%);
+}
+
+.app-navbar .navbar-brand,
+.app-navbar .nav-link,
+.app-navbar .navbar-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link:focus {
+  color: #ffffff !important;
+}
+
+.app-navbar .dropdown-menu-dark {
+  background-color: #111827;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-navbar .dropdown-item {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.app-navbar .dropdown-item:hover,
+.app-navbar .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.role-badge {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

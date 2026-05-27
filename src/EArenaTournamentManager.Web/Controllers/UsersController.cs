@@ -1,5 +1,10 @@
-﻿using EArenaTournamentManager.Web.Models.Users;
+﻿using EArenaTournamentManager.Web.Models.OrganizationStaff;
+using EArenaTournamentManager.Web.Models.TeamMembers;
+using EArenaTournamentManager.Web.Models.Tournaments;
+using EArenaTournamentManager.Web.Models.Teams;
+using EArenaTournamentManager.Web.Models.Users;
 using EArenaTournamentManager.Web.Services;
+using System;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EArenaTournamentManager.Web.Controllers
@@ -7,10 +12,29 @@ namespace EArenaTournamentManager.Web.Controllers
     public class UsersController : BaseController
     {
         private readonly UserService _userService;
+        private readonly TeamService _teamService;
+        private readonly TeamMemberService _teamMemberService;
+        private readonly OrganizationService _organizationService;
+        private readonly OrganizationStaffService _organizationStaffService;
+        private readonly TournamentService _tournamentService;
+        private readonly TournamentParticipantService _tournamentParticipantService;
 
-        public UsersController(UserService userService)
+        public UsersController(
+            UserService userService,
+            TeamService teamService,
+            TeamMemberService teamMemberService,
+            OrganizationService organizationService,
+            OrganizationStaffService organizationStaffService,
+            TournamentService tournamentService,
+            TournamentParticipantService tournamentParticipantService)
         {
             _userService = userService;
+            _teamService = teamService;
+            _teamMemberService = teamMemberService;
+            _organizationService = organizationService;
+            _organizationStaffService = organizationStaffService;
+            _tournamentService = tournamentService;
+            _tournamentParticipantService = tournamentParticipantService;
         }
 
         public async Task<IActionResult> Index()
@@ -23,7 +47,21 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _userService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "User unavailable",
+                    "We could not load that user.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No profile exists for id {id}.",
+                    "Back to Users",
+                    "Users",
+                    "Index",
+                    "Create User",
+                    "Users",
+                    "Create");
+            }
+
             return View(result.Data);
         }
 
@@ -43,7 +81,20 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var result = await _userService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "User unavailable",
+                    "We could not load that user.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No profile exists for id {id}.",
+                    "Back to Users",
+                    "Users",
+                    "Index",
+                    "Create User",
+                    "Users",
+                    "Create");
+            }
 
             var request = new UserRequest
             {
@@ -53,6 +104,103 @@ namespace EArenaTournamentManager.Web.Controllers
                 Role = result.Data.Role
             };
             return View(request);
+        }
+
+        public async Task<IActionResult> Profile()
+        {
+            var userId = ExtractUserIdFromToken(GetToken());
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var result = await _userService.GetByIdAsync(userId.Value, GetToken());
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    userId.Value,
+                    "Profile unavailable",
+                    "We could not load your profile.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : "No profile exists for the current user.",
+                    "Back to Home",
+                    "Home",
+                    "Index");
+            }
+
+            await PopulateProfileTeamsAsync(userId.Value, GetToken());
+            ViewBag.ProfileUser = result.Data;
+            return View(new UserRequest
+            {
+                Username = result.Data.Username,
+                Email = result.Data.Email,
+                AvatarImageUrl = result.Data.AvatarImageUrl,
+                Role = result.Data.Role
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Profile(UserRequest request)
+        {
+            var userId = ExtractUserIdFromToken(GetToken());
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var currentUser = await _userService.GetByIdAsync(userId.Value, GetToken());
+            if (currentUser?.Data is null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            request.Role = currentUser.Data.Role;
+
+            var result = await _userService.UpdateAsync(userId.Value, request, GetToken());
+            if (result?.IsSuccess is true)
+            {
+                HttpContext.Session.SetString("Username", request.Username);
+                if (!string.IsNullOrWhiteSpace(request.AvatarImageUrl))
+                {
+                    HttpContext.Session.SetString("Avatar", request.AvatarImageUrl);
+                }
+
+                TempData["Success"] = "Profile updated.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to update your profile." };
+            ModelState.AddModelError(string.Empty, string.Join(" ", errors));
+            await PopulateProfileTeamsAsync(userId.Value, GetToken());
+            ViewBag.ProfileUser = currentUser.Data;
+            return View(request);
+        }
+
+        private async Task PopulateProfileTeamsAsync(int userId, string? token)
+        {
+            var teamMembers = (await _teamMemberService.GetAllAsync(token))?.Data?.Items ?? new();
+            var teams = (await _teamService.GetAllAsync(token))?.Data?.Items ?? new();
+
+            var teamMemberships = teamMembers
+                .Where(x => x.UserId == userId && x.IsActive)
+                .ToList();
+
+            ViewBag.MyTeams = teams
+                .Where(team => teamMemberships.Any(member => member.TeamId == team.Id) || team.CaptainId == userId)
+                .Select(team =>
+                {
+                    var membership = teamMemberships.FirstOrDefault(member => member.TeamId == team.Id);
+                    return new
+                    {
+                        Id = team.Id,
+                        Name = team.Name,
+                        Description = team.Description,
+                        LogoImageUrl = team.LogoImageUrl,
+                        Role = team.CaptainId == userId ? "Captain" : membership?.Role ?? "Member",
+                        JoinedOn = membership?.JoinedOn ?? team.CreatedOn
+                    };
+                })
+                .OrderByDescending(team => team.JoinedOn)
+                .ToList();
         }
 
         [HttpPost]
@@ -67,10 +215,23 @@ namespace EArenaTournamentManager.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _userService.DeleteAsync(id, GetToken());
+            var result = await _userService.DeleteAsync(id, GetToken());
+            if (result?.IsSuccess is not true)
+            {
+                TempData["Error"] = result?.Errors != null
+                    ? string.Join(" ", result.Errors.SelectMany(e => e.Messages))
+                    : "We could not delete that user.";
+            }
+            else
+            {
+                TempData["Success"] = "User deleted.";
+            }
+
             return RedirectToAction("Index");
         }
+
     }
 }

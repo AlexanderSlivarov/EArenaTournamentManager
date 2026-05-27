@@ -53,6 +53,11 @@ namespace EArenaTournamentManager.API.Controllers
                 Id = entity.Id,
                 UserId = entity.UserId,
                 TeamId = entity.TeamId,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                IsActive = entity.IsActive,
                 JoinedOn = entity.JoinedOn,
                 Role = entity.Role
             };

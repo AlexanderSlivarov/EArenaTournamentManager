@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
+using EArenaTournamentManager.Web.Middleware;
 using EArenaTournamentManager.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("EArenaAPI", client =>
 {
@@ -22,18 +23,20 @@ builder.Services.AddScoped<TournamentParticipantService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Home/Error");    
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseStatusCodePagesWithReExecute("/Home/NotFound", "?code={0}");
+
 app.UseSession();
+
+app.UseMiddleware<UnauthorizedApiMiddleware>();
 
 app.UseAuthorization();
 

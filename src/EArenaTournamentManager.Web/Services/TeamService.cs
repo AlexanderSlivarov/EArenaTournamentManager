@@ -10,35 +10,27 @@ namespace EArenaTournamentManager.Web.Services
 
         public async Task<ServiceResult<PagedData<TeamResponse>>?> GetAllAsync(string? token = null)
         {
-            var client = CreateClient(token);
-            return await client.GetFromJsonAsync<ServiceResult<PagedData<TeamResponse>>>("/api/teams");
+            return await GetJsonAsync<ServiceResult<PagedData<TeamResponse>>>("/api/teams", token);
         }
 
         public async Task<ServiceResult<TeamResponse>?> GetByIdAsync(int id, string? token = null)
         {
-            var client = CreateClient(token);
-            return await client.GetFromJsonAsync<ServiceResult<TeamResponse>>($"/api/teams/{id}");
+            return await GetJsonAsync<ServiceResult<TeamResponse>>($"/api/teams/{id}", token);
         }
 
         public async Task<ServiceResult<TeamResponse>?> CreateAsync(TeamRequest request, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.PostAsJsonAsync("/api/teams", request);
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TeamResponse>>();
+            return await SendJsonAsync<ServiceResult<TeamResponse>>(HttpMethod.Post, "/api/teams", request, token);
         }
 
         public async Task<ServiceResult<TeamResponse>?> UpdateAsync(int id, TeamRequest request, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.PutAsJsonAsync($"/api/teams/{id}", request);
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TeamResponse>>();
+            return await SendJsonAsync<ServiceResult<TeamResponse>>(HttpMethod.Put, $"/api/teams/{id}", request, token);
         }
 
         public async Task<ServiceResult<TeamResponse>?> DeleteAsync(int id, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.DeleteAsync($"/api/teams/{id}");
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TeamResponse>>();
+            return await SendJsonAsync<ServiceResult<TeamResponse>>(HttpMethod.Delete, $"/api/teams/{id}", null, token);
         }
     }
 }

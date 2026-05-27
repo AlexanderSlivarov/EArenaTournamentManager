@@ -43,9 +43,8 @@ namespace EArenaTournamentManager.API.Extensions
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddHttpContextAccessor();         
+            services.AddScoped<IUnitOfWork, UnitOfWork>();            
 
             return services;
         }
@@ -95,7 +94,7 @@ namespace EArenaTournamentManager.API.Extensions
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontEnd", policy =>
+                options.AddPolicy("AllowFrontend", policy =>
                     policy.WithOrigins("http://localhost:5000")
                     .AllowAnyHeader()
                     .AllowAnyMethod());

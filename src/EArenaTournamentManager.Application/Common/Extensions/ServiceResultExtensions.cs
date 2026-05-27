@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace EArenaTournamentManager.Application.Common.Extensions
 {
-    public class ServiceResultExtensions
+    public static class ServiceResultExtensions
     {
         public static ServiceResult<T> Failure<T>(T? data, ModelStateDictionary errors)
         {

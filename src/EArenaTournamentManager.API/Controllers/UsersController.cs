@@ -2,6 +2,7 @@
 using EArenaTournamentManager.Application.ResponseDTOs.Users;
 using EArenaTournamentManager.Application.Services.Interfaces.Users;
 using EArenaTournamentManager.Domain.Entities;
+using EArenaTournamentManager.Infrastructure.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
@@ -19,8 +20,12 @@ namespace EArenaTournamentManager.API.Controllers
         UserResponse,
         UserGetResponse>
     {
-        public UsersController(IUserService userService) : base(userService) 
-        { }
+        private readonly IPasswordHasher _passwordHasher;
+
+        public UsersController(IUserService userService, IPasswordHasher passwordHasher) : base(userService) 
+        {
+            _passwordHasher = passwordHasher;
+        }
 
         protected override void PopulateEntity(User entity, UserRequest model)
         {
@@ -31,7 +36,7 @@ namespace EArenaTournamentManager.API.Controllers
 
             if (!string.IsNullOrEmpty(model.Password))
             {
-                entity.PasswordHash = model.Password;
+                entity.PasswordHash = _passwordHasher.HashPassword(model.Password);
             }
         }
 
@@ -63,6 +68,11 @@ namespace EArenaTournamentManager.API.Controllers
                 Username = entity.Username,
                 Email = entity.Email,
                 AvatarImageUrl = entity.AvatarImageUrl,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                IsActive = entity.IsActive,
                 Role = entity.Role                
             };
         }

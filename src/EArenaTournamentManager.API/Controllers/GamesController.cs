@@ -55,6 +55,11 @@ namespace EArenaTournamentManager.API.Controllers
                 Name = entity.Name!,
                 Description = entity.Description,
                 ImageUrl = entity.ImageUrl,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn,
+                UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                IsActive = entity.IsActive,
                 Platform = entity.Platform
             };
         }

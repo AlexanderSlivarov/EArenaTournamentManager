@@ -1,6 +1,7 @@
 ﻿using EArenaTournamentManager.Domain.Entities;
 using EArenaTournamentManager.Infrastructure.Persistence;
 using EArenaTournamentManager.Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace EArenaTournamentManager.Infrastructure.Repositories.Implementations
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(EArenaAppDbContext context) : base(context) 
+        public UserRepository(EArenaAppDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor) 
         { }
 
         public async Task<User?> GetByUsernameAsync(string username)

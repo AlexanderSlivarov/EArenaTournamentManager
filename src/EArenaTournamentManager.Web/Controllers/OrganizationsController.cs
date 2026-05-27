@@ -23,7 +23,17 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _organizationService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "Organization unavailable",
+                    "We could not load that organization.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No organization exists for id {id}.",
+                    "Back to Organizations",
+                    "Organizations",
+                    "Index");
+            }
             return View(result.Data);
         }
 
@@ -43,7 +53,17 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var result = await _organizationService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "Organization unavailable",
+                    "We could not load that organization.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No organization exists for id {id}.",
+                    "Back to Organizations",
+                    "Organizations",
+                    "Index");
+            }
 
             var request = new OrganizationRequest
             {

@@ -13,26 +13,20 @@
 
             <div class="mb-3">
                 <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="3-20 characters, letters/numbers/_" />
+                <input asp-for="Username" class="form-control" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" type="email" class="form-control" placeholder="Enter email" />
+                <input asp-for="Email" type="email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" type="password" class="form-control" placeholder="Min 8 chars, upper, lower, number, special" />
+                <input asp-for="Password" type="password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="AvatarImageUrl" class="form-label"></label>
-                <input asp-for="AvatarImageUrl" class="form-control" placeholder="https://example.com/avatar.png (optional)" />
-                <span asp-validation-for="AvatarImageUrl" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Register</button>

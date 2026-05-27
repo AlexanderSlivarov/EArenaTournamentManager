@@ -15,16 +15,11 @@ using System.Threading.Tasks;
 namespace EArenaTournamentManager.Application.Services.Implementations.Users
 {
     public class UserService : BaseService<User>, IUserService
-    {
-        private readonly IPasswordHasher _passwordHasher;
-
-        public UserService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher) : base(unitOfWork)
-        {
-            _passwordHasher = passwordHasher;
-        }   
+    {      
+        public UserService(IUnitOfWork unitOfWork) : base(unitOfWork)
+        { }   
         
         protected override IRepository<User> GetRepository() => _unitOfWork.Users;
-
 
         public async Task<User?> GetByUsernameAsync(string username)
            => await _unitOfWork.Users.GetByUsernameAsync(username);
@@ -55,12 +50,7 @@ namespace EArenaTournamentManager.Application.Services.Implementations.Users
                     "Email already exists."
                 );
             }
-
-            if (!string.IsNullOrEmpty(entity.PasswordHash))
-            {
-                entity.PasswordHash = _passwordHasher.HashPassword(entity.PasswordHash);
-            }
-
+            
             return await base.SaveAsync(entity);
         }
     }

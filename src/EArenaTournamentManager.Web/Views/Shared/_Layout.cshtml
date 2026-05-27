@@ -10,52 +10,104 @@
     <link rel="stylesheet" href="~/EArenaTournamentManager.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{ 
+        var currentRole = Context.Session.GetString("Role") ?? string.Empty;
+        var isLoggedIn = Context.Session.GetString("Username") != null;
+        var isAdmin = string.Equals(currentRole, "Admin", StringComparison.OrdinalIgnoreCase);
+        var isMember = string.Equals(currentRole, "Member", StringComparison.OrdinalIgnoreCase) || string.Equals(currentRole, "User", StringComparison.OrdinalIgnoreCase);
+    }
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark app-navbar border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EArenaTournamentManager.Web</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (Context.Session.GetString("Username") != null)
+                        @if (isLoggedIn)
                         {
-                            <li class="nav-item d-flex align-items-center gap-2">
-                                @if (!string.IsNullOrEmpty(Context.Session.GetString("Avatar")))
-                                {
-                                    <img src="@Context.Session.GetString("Avatar")"
-                                         alt="avatar"
-                                         style="width:32px; height:32px; border-radius:50%; object-fit:cover;" />
-                                }
-                                else
-                                {
-                                    <span style="width:32px; height:32px; border-radius:50%; background:#6c757d; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:14px;">
-                                        @Context.Session.GetString("Username")?[0].ToString().ToUpper()
-                                    </span>
-                                }
-                                <span class="nav-link text-dark">@Context.Session.GetString("Username")</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Logout">Logout</a>
+                            if (isAdmin)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Manage
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="manageDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Index">Users</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Games" asp-action="Index">Games</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Organizations" asp-action="Index">Organizations</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Teams" asp-action="Index">Teams</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Tournaments" asp-action="Index">Tournaments</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else if (isMember)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="browseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Browse
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="browseDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Games" asp-action="Index">Games</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Tournaments" asp-action="Index">Tournaments</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Teams" asp-action="Index">Teams</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Organizations" asp-action="Index">Organizations</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <span class="nav-link text-warning-emphasis">Limited access</span>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <ul class="navbar-nav align-items-lg-center gap-lg-2">
+                        @if (isLoggedIn)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @if (!string.IsNullOrEmpty(Context.Session.GetString("Avatar")))
+                                    {
+                                        <img src="@Context.Session.GetString("Avatar")"
+                                             alt="avatar"
+                                             style="width:32px; height:32px; border-radius:50%; object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <span style="width:32px; height:32px; border-radius:50%; background:#6c757d; display:inline-flex; align-items:center; justify-content:center; color:white; font-size:14px;">
+                                            @Context.Session.GetString("Username")?[0].ToString().ToUpper()
+                                        </span>
+                                    }
+                                    <span class="px-0">@Context.Session.GetString("Username")</span>
+                                    @if (!string.IsNullOrWhiteSpace(currentRole))
+                                    {
+                                        <span class="badge rounded-pill role-badge">@currentRole</span>
+                                    }
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="profileDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Users" asp-action="Profile">Profile</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Logout</a></li>
+                                </ul>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Register">Register</a>
+                                <a class="nav-link" asp-controller="Auth" asp-action="Register">Register</a>
                             </li>
                         }
                     </ul>

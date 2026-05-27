@@ -1,5 +1,109 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EArenaTournamentManager.Web.Models.Tournaments.TournamentResponse
 @{
+    ViewData["Title"] = Model.Name;
 }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@Model.Name</h2>
+    <div class="d-flex gap-2">
+        @if (ViewBag.IsLoggedIn == true)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                <button type="submit" class="btn btn-outline-danger"
+                        onclick="return confirm('Delete this tournament?')">
+                    Delete
+                </button>
+            </form>
+        }
+        <a asp-action="Index" class="btn btn-outline-primary">Back to list</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Tournament Info</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-@(Model.Status == "Open" ? "success" : Model.Status == "Closed" ? "secondary" : "danger")">
+                            @Model.Status
+                        </span>
+                    </dd>
+                    <dt class="col-sm-3">Date</dt>
+                    <dd class="col-sm-9">@DateTimeOffset.FromUnixTimeSeconds(Model.DateTime).ToString("dd MMM yyyy HH:mm")</dd>
+                    @if (!string.IsNullOrEmpty(Model.Format))
+                    {
+                        <dt class="col-sm-3">Format</dt>
+                        <dd class="col-sm-9">@Model.Format</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Map))
+                    {
+                        <dt class="col-sm-3">Map</dt>
+                        <dd class="col-sm-9">@Model.Map</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Region))
+                    {
+                        <dt class="col-sm-3">Region</dt>
+                        <dd class="col-sm-9">@Model.Region</dd>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Prizes))
+                    {
+                        <dt class="col-sm-3">Prizes</dt>
+                        <dd class="col-sm-9">@Model.Prizes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Rules))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Rules</h5>
+                    <p>@Model.Rules</p>
+                </div>
+            </div>
+        }
+      
+        @if (ViewBag.IsLoggedIn == true && Model.Status == "Open")
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Register a Team</h5>
+                    <form asp-controller="TournamentParticipants" asp-action="Create" method="post">
+                        <input type="hidden" name="TournamentId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label">Team ID</label>
+                            <input type="number" name="TeamId" class="form-control" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.IsAdmin == true)
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Metadata</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Created By</dt>
+                        <dd class="col-sm-9">@Model.CreatedBy</dd>
+                        <dt class="col-sm-3">Created On</dt>
+                        <dd class="col-sm-9">@((Model.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(Model.CreatedOn).ToLocalTime().ToString("dd MMM yyyy HH:mm") : string.Empty)</dd>
+                        <dt class="col-sm-3">Updated By</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedBy.HasValue ? Model.UpdatedBy.Value.ToString() : "-")</dd>
+                        <dt class="col-sm-3">Updated On</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedOn.HasValue ? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</dd>
+                        <dt class="col-sm-3">Active</dt>
+                        <dd class="col-sm-9">@(Model.IsActive ? "Yes" : "No")</dd>
+                    </dl>
+                </div>
+            </div>
+        }
+    </div>
+</div>

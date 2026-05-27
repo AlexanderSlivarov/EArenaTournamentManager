@@ -26,6 +26,7 @@ namespace EArenaTournamentManager.Web.Controllers
                 HttpContext.Session.SetString("Token", result.Data.Token);
                 HttpContext.Session.SetString("Username", result.Data.Username);
                 HttpContext.Session.SetString("Avatar", result.Data.AvatarImageUrl ?? string.Empty);
+                HttpContext.Session.SetString("Role", ExtractRoleFromToken(result.Data.Token) ?? string.Empty);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -44,7 +45,7 @@ namespace EArenaTournamentManager.Web.Controllers
         {
             var result = await _authService.RegisterAsync(request);
 
-            if (result?.isSuccess is true)
+            if (result?.IsSuccess is true)
             {
                 return RedirectToAction("Login");
             }

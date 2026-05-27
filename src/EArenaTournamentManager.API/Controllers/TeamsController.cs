@@ -55,7 +55,12 @@ namespace EArenaTournamentManager.API.Controllers
                 CaptainId = entity.CaptainId,
                 Name = entity.Name,
                 Description = entity.Description,
-                LogoImageUrl = entity.LogoImageUrl
+                LogoImageUrl = entity.LogoImageUrl,
+                CreatedBy = entity.CreatedBy,
+                CreatedOn = entity.CreatedOn
+                ,UpdatedBy = entity.UpdatedBy,
+                UpdatedOn = entity.UpdatedOn,
+                IsActive = entity.IsActive
             };
         }
     }

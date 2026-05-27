@@ -21,6 +21,11 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Tournaments
         public string? Rules { get; set; }
         public string? Prizes { get; set; }
         public long DateTime { get; set; }
+        public int CreatedBy { get; set; }
+        public long CreatedOn { get; set; }
+        public int? UpdatedBy { get; set; }
+        public long? UpdatedOn { get; set; }
+        public bool IsActive { get; set; }
 
         public RegistrationStatus? Status { get; set; }
         public string StatusName => Status.ToString()!;

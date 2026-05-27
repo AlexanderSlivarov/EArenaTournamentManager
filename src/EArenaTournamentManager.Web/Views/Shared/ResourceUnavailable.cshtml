@@ -1,0 +1,49 @@
+@model int
+@{
+    var title = ViewData["Title"] as string ?? "Unavailable";
+    var heading = ViewData["Heading"] as string ?? "This page is unavailable.";
+    var message = ViewData["Message"] as string ?? "The item you requested could not be found.";
+
+    ViewData["Title"] = title;
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-lg-10 col-xl-9">
+        <div class="card border-0 shadow-lg overflow-hidden notfound-shell">
+            <div class="notfound-accent"></div>
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                    <div>
+                        <h1 class="display-6 fw-semibold mb-2">@heading</h1>
+                        <p class="lead text-muted mb-0">@message</p>
+                    </div>
+                    <div class="notfound-badge">EArenaTournamentManager</div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="notfound-stat h-100">
+                            <div class="notfound-stat-label">Check</div>
+                            <div class="notfound-stat-title">URL spelling</div>
+                            <div class="notfound-stat-text">Confirm the route matches a page in the app.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="notfound-stat h-100">
+                            <div class="notfound-stat-label">Try</div>
+                            <div class="notfound-stat-title">A known page</div>
+                            <div class="notfound-stat-text">Use the home page or an existing entity list.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="notfound-stat h-100">
+                            <div class="notfound-stat-label">Need help</div>
+                            <div class="notfound-stat-title">Use navigation</div>
+                            <div class="notfound-stat-text">Return from here without losing your session.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

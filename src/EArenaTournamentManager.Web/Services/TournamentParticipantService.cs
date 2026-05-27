@@ -10,35 +10,27 @@ namespace EArenaTournamentManager.Web.Services
 
         public async Task<ServiceResult<PagedData<TournamentParticipantResponse>>?> GetAllAsync(string? token = null)
         {
-            var client = CreateClient(token);
-            return await client.GetFromJsonAsync<ServiceResult<PagedData<TournamentParticipantResponse>>>("/api/tournamentparticipants");
+            return await GetJsonAsync<ServiceResult<PagedData<TournamentParticipantResponse>>>("/api/tournamentparticipants", token);
         }
 
         public async Task<ServiceResult<TournamentParticipantResponse>?> GetByIdAsync(int id, string? token = null)
         {
-            var client = CreateClient(token);
-            return await client.GetFromJsonAsync<ServiceResult<TournamentParticipantResponse>>($"/api/tournamentparticipants/{id}");
+            return await GetJsonAsync<ServiceResult<TournamentParticipantResponse>>($"/api/tournamentparticipants/{id}", token);
         }
 
         public async Task<ServiceResult<TournamentParticipantResponse>?> CreateAsync(TournamentParticipantRequest request, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.PostAsJsonAsync("/api/tournamentparticipants", request);
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TournamentParticipantResponse>>();
+            return await SendJsonAsync<ServiceResult<TournamentParticipantResponse>>(HttpMethod.Post, "/api/tournamentparticipants", request, token);
         }
 
         public async Task<ServiceResult<TournamentParticipantResponse>?> UpdateAsync(int id, TournamentParticipantRequest request, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.PutAsJsonAsync($"/api/tournamentparticipants/{id}", request);
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TournamentParticipantResponse>>();
+            return await SendJsonAsync<ServiceResult<TournamentParticipantResponse>>(HttpMethod.Put, $"/api/tournamentparticipants/{id}", request, token);
         }
 
         public async Task<ServiceResult<TournamentParticipantResponse>?> DeleteAsync(int id, string? token = null)
         {
-            var client = CreateClient(token);
-            var response = await client.DeleteAsync($"/api/tournamentparticipants/{id}");
-            return await response.Content.ReadFromJsonAsync<ServiceResult<TournamentParticipantResponse>>();
+            return await SendJsonAsync<ServiceResult<TournamentParticipantResponse>>(HttpMethod.Delete, $"/api/tournamentparticipants/{id}", null, token);
         }
     }
 }

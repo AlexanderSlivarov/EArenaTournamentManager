@@ -14,6 +14,11 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Games
         public string Name { get; set; } = string.Empty;
         public string? Description {get; set;}
         public string? ImageUrl { get; set; }
+        public int CreatedBy { get; set; }
+        public long CreatedOn { get; set; }
+        public int? UpdatedBy { get; set; }
+        public long? UpdatedOn { get; set; }
+        public bool IsActive { get; set; }
 
         public Platform? Platform { get; set; }
         public string PlatformName => Platform.ToString()!;

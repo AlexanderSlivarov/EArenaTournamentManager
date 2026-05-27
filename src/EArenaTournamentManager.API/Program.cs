@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using EArenaTournamentManager.API.Extensions;
 using EArenaTournamentManager.API.Middleware;
 using EArenaTournamentManager.Infrastructure.Persistance.Seed;
@@ -11,7 +12,11 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
+    });    
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 var app = builder.Build();
 
@@ -47,6 +52,7 @@ if (app.Environment.IsDevelopment())
 }
 
 var retries = 5;
+
 while (retries > 0)
 {
     try

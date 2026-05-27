@@ -23,7 +23,17 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _tournamentService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "Tournament unavailable",
+                    "We could not load that tournament.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No tournament exists for id {id}.",
+                    "Back to Tournaments",
+                    "Tournaments",
+                    "Index");
+            }
             return View(result.Data);
         }
 
@@ -43,7 +53,17 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var result = await _tournamentService.GetByIdAsync(id, GetToken());
-            if (result?.Data is null) return NotFound();
+            if (result?.Data is null)
+            {
+                return MissingResource(
+                    id,
+                    "Tournament unavailable",
+                    "We could not load that tournament.",
+                    result?.Errors != null ? string.Join(" ", result.Errors.SelectMany(e => e.Messages)) : $"No tournament exists for id {id}.",
+                    "Back to Tournaments",
+                    "Tournaments",
+                    "Index");
+            }
 
             var request = new TournamentRequest
             {
