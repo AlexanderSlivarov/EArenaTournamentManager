@@ -46,14 +46,14 @@ namespace EArenaTournamentManager.Application.Services.Implementations.Auth
 
         public async Task<ServiceResult<AuthResponse>> LoginAsync(LoginRequest request)
         {
-            var user = await _userService.GetByUsernameAsync(request.Username);
+            var user = await _userService.GetByEmailAsync(request.Email);
 
             if (user is null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
             {
                 return ServiceResultExtensions.Failure<AuthResponse>(
                     null,
                     "Login",
-                    "Invalid username or password." 
+                    "Invalid email or password." 
                 );
             }                       
 

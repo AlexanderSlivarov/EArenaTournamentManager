@@ -168,6 +168,18 @@
                     <h5 class="card-title mb-0">Registered Teams</h5>
                     <span class="badge text-bg-secondary">@totalCount</span>
                 </div>
+                <div class="mb-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-10">
+                            <label for="tournamentParticipantsTeamFilter" class="form-label small text-muted mb-1">Team name</label>
+                            <input id="tournamentParticipantsTeamFilter" type="search" class="form-control form-control-sm" placeholder="Search team name" />
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button id="tournamentParticipantsApplyFilter" type="button" class="btn btn-sm btn-primary w-100">Filter</button>
+                            <button id="tournamentParticipantsClearFilter" type="button" class="btn btn-sm btn-outline-secondary w-100">Clear</button>
+                        </div>
+                    </div>
+                </div>
                 @if (!participants.Any())
                 {
                     <p class="text-muted mb-0">No teams registered yet.</p>
@@ -183,10 +195,10 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tournamentParticipantsTableBody">
                                 @foreach (var p in participants)
                                 {
-                                    <tr>
+                                    <tr data-team-name="@p.TeamName">
                                         <td>
                                             <a asp-controller="Teams" asp-action="Details" asp-route-id="@p.TeamId">
                                                 @p.TeamName
@@ -211,6 +223,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <p id="tournamentParticipantsFilterEmpty" class="text-muted mt-3 mb-0 d-none">No registered teams match your search.</p>
                 }
             </div>
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 px-3 pb-3 pt-3">
@@ -273,3 +286,43 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const teamInput = document.getElementById('tournamentParticipantsTeamFilter');
+            const applyButton = document.getElementById('tournamentParticipantsApplyFilter');
+            const clearButton = document.getElementById('tournamentParticipantsClearFilter');
+            const rows = Array.from(document.querySelectorAll('#tournamentParticipantsTableBody tr'));
+            const emptyState = document.getElementById('tournamentParticipantsFilterEmpty');
+
+            if (!teamInput || !applyButton || !clearButton) {
+                return;
+            }
+
+            const applyFilter = () => {
+                const teamTerm = teamInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                rows.forEach((row) => {
+                    const rowTeamName = (row.dataset.teamName || '').toLowerCase();
+                    const matches = !teamTerm || rowTeamName.includes(teamTerm);
+                    row.classList.toggle('d-none', !matches);
+                    if (matches) {
+                        visibleCount += 1;
+                    }
+                });
+
+                if (emptyState) {
+                    emptyState.classList.toggle('d-none', visibleCount > 0);
+                }
+            };
+
+            applyButton.addEventListener('click', applyFilter);
+            clearButton.addEventListener('click', () => {
+                teamInput.value = '';
+                applyFilter();
+            });
+        })();
+    </script>
+}

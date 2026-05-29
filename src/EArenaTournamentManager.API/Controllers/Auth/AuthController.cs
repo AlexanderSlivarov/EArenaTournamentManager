@@ -55,6 +55,5 @@ namespace EArenaTournamentManager.API.Controllers.Auth
 
             return Ok(result);
         }
-
     }
 }

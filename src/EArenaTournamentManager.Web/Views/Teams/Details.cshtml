@@ -104,6 +104,22 @@
             <span class="badge bg-primary">@(memberCount + 1)</span>
         </div>
         <div class="card-body p-0">
+            <div class="px-3 pt-3 pb-0">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label for="teamMembersUsernameFilter" class="form-label small text-muted mb-1">Username</label>
+                        <input id="teamMembersUsernameFilter" type="search" class="form-control form-control-sm" placeholder="Search username" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="teamMembersRoleFilter" class="form-label small text-muted mb-1">Role</label>
+                        <input id="teamMembersRoleFilter" type="search" class="form-control form-control-sm" placeholder="Search role" />
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button id="teamMembersApplyFilter" type="button" class="btn btn-sm btn-primary w-100">Filter</button>
+                        <button id="teamMembersClearFilter" type="button" class="btn btn-sm btn-outline-secondary w-100">Clear</button>
+                    </div>
+                </div>
+            </div>
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
@@ -116,8 +132,8 @@
                         }
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
+                <tbody id="teamMembersTableBody">
+                    <tr data-username="@ViewBag.CaptainUsername" data-role="Captain">
                         <td><strong>@ViewBag.CaptainUsername</strong></td>
                         <td><span class="badge bg-warning text-dark">Captain</span></td>
                         <td>—</td>
@@ -128,7 +144,7 @@
                     </tr>
                     @foreach (var entry in members)
                     {
-                        <tr>
+                        <tr data-username="@entry.Username" data-role="@(string.IsNullOrEmpty((string?)entry.Member.Role) ? "Member" : entry.Member.Role)">
                             <td>@entry.Username</td>
                             <td>@(string.IsNullOrEmpty((string?)entry.Member.Role) ? "Member" : entry.Member.Role)</td>
                             <td>@(entry.Member.JoinedOn > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Member.JoinedOn).ToLocalTime().ToString("dd MMM yyyy") : "-")</td>
@@ -149,6 +165,7 @@
                     }
                 </tbody>
             </table>
+            <p id="teamMembersFilterEmpty" class="text-muted px-3 pb-3 mb-0 d-none">No members match your search.</p>
         </div>
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 px-3 pb-3 pt-3">
             <div class="text-muted">Page @currentPage / @totalPages</div>
@@ -219,6 +236,52 @@
             </div>
         }
     </div>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const usernameInput = document.getElementById('teamMembersUsernameFilter');
+            const roleInput = document.getElementById('teamMembersRoleFilter');
+            const applyButton = document.getElementById('teamMembersApplyFilter');
+            const clearButton = document.getElementById('teamMembersClearFilter');
+            const rows = Array.from(document.querySelectorAll('#teamMembersTableBody tr'));
+            const emptyState = document.getElementById('teamMembersFilterEmpty');
+
+            if (!usernameInput || !roleInput || !applyButton || !clearButton) {
+                return;
+            }
+
+            const applyFilter = () => {
+                const usernameTerm = usernameInput.value.trim().toLowerCase();
+                const roleTerm = roleInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                rows.forEach((row) => {
+                    const rowUsername = (row.dataset.username || '').toLowerCase();
+                    const rowRole = (row.dataset.role || '').toLowerCase();
+                    const matchesUsername = !usernameTerm || rowUsername.includes(usernameTerm);
+                    const matchesRole = !roleTerm || rowRole.includes(roleTerm);
+                    const matches = matchesUsername && matchesRole;
+                    row.classList.toggle('d-none', !matches);
+                    if (matches) {
+                        visibleCount += 1;
+                    }
+                });
+
+                if (emptyState) {
+                    emptyState.classList.toggle('d-none', visibleCount > 0);
+                }
+            };
+
+            applyButton.addEventListener('click', applyFilter);
+            clearButton.addEventListener('click', () => {
+                usernameInput.value = '';
+                roleInput.value = '';
+                applyFilter();
+            });
+        })();
+    </script>
 }
 
 @* Tournaments — visible to members, captain, and admin *@
