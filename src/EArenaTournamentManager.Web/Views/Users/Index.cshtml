@@ -2,6 +2,19 @@
 
 @{
     ViewData["Title"] = "Users";
+    var usernameFilter = ViewBag.UsernameFilter as string ?? string.Empty;
+    var emailFilter = ViewBag.EmailFilter as string ?? string.Empty;
+    var roleFilter = ViewBag.RoleFilter as string ?? string.Empty;
+    var currentPage = ViewBag.CurrentPage is int pageNumber ? pageNumber : 1;
+    var pageSize = ViewBag.PageSize is int size ? size : 10;
+    var pager = ViewBag.Pager as EArenaTournamentManager.Web.Models.Shared.PagerResponse;
+    var totalCount = pager?.Count ?? Model.Count;
+    var totalPages = pageSize > 0 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 1;
+    if (totalPages < 1)
+    {
+        totalPages = 1;
+    }
+    var pageSizes = new[] { 5, 10, 25, 50 };
 }
 
 @if (TempData["Error"] != null)
@@ -28,6 +41,63 @@
         <a asp-action="Create" class="btn btn-primary">Create User</a>
     }
 </div>
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" value="@usernameFilter" class="form-control" placeholder="Search username" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Email</label>
+            <input type="text" name="email" value="@emailFilter" class="form-control" placeholder="Search email" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select">
+                @if (string.IsNullOrWhiteSpace(roleFilter))
+                {
+                    <option value="" selected>All roles</option>
+                }
+                else
+                {
+                    <option value="">All roles</option>
+                }
+
+                @if (string.Equals(roleFilter, "Member", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Member" selected>Member</option>
+                }
+                else
+                {
+                    <option value="Member">Member</option>
+                }
+
+                @if (string.Equals(roleFilter, "Organizer", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Organizer" selected>Organizer</option>
+                }
+                else
+                {
+                    <option value="Organizer">Organizer</option>
+                }
+
+                @if (string.Equals(roleFilter, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Admin" selected>Admin</option>
+                }
+                else
+                {
+                    <option value="Admin">Admin</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </div>
+</form>
 
 @if (!Model.Any())
 {
@@ -125,3 +195,52 @@ else
         </table>
     </div>
 }
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mt-4">
+    <div class="text-muted">
+        Page @currentPage / @totalPages
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <label for="userPageSize" class="text-muted mb-0">Page size</label>
+            <form method="get" class="d-inline">
+                <input type="hidden" name="username" value="@usernameFilter" />
+                <input type="hidden" name="email" value="@emailFilter" />
+                <input type="hidden" name="role" value="@roleFilter" />
+                <input type="hidden" name="page" value="1" />
+                <select id="userPageSize" name="pageSize" class="form-select" onchange="this.form.submit()" style="width:auto;min-width:110px;">
+                    @foreach (var sizeOption in pageSizes)
+                    {
+                        if (sizeOption == pageSize)
+                        {
+                            <option value="@sizeOption" selected>@sizeOption</option>
+                        }
+                        else
+                        {
+                            <option value="@sizeOption">@sizeOption</option>
+                        }
+                    }
+                </select>
+            </form>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary @(currentPage <= 1 ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-username="@usernameFilter"
+               asp-route-email="@emailFilter"
+               asp-route-role="@roleFilter"
+               asp-route-page="@(currentPage - 1)"
+               asp-route-pageSize="@pageSize">Prev</a>
+
+            <a class="btn btn-outline-secondary @(currentPage >= totalPages ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-username="@usernameFilter"
+               asp-route-email="@emailFilter"
+               asp-route-role="@roleFilter"
+               asp-route-page="@(currentPage + 1)"
+               asp-route-pageSize="@pageSize">Next</a>
+        </div>
+    </div>
+</div>

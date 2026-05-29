@@ -1,4 +1,5 @@
 ﻿using EArenaTournamentManager.Web.Models.Organizations;
+using EArenaTournamentManager.Web.Models.Users;
 using EArenaTournamentManager.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,10 +20,16 @@ namespace EArenaTournamentManager.Web.Controllers
             _tournamentService = tournamentService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? name, string? type, int page = 1, int pageSize = 10)
         {
-            var result = await _organizationService.GetAllAsync(GetToken());
+            ViewBag.NameFilter = name;
+            ViewBag.TypeFilter = type;
+
+            var result = await _organizationService.GetAllAsync(name, type, page, pageSize, GetToken());
             var items = result?.Data?.Items ?? new();
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Pager = result?.Data?.Pager;
 
             if (ViewBag.IsOrganizer == true || ViewBag.IsAdmin == true)
             {
@@ -33,7 +40,7 @@ namespace EArenaTournamentManager.Web.Controllers
             return View(items);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, int page = 1, int pageSize = 10)
         {            
             var result = await _organizationService.GetByIdAsync(id, GetToken());
 
@@ -52,16 +59,20 @@ namespace EArenaTournamentManager.Web.Controllers
             var userId = ExtractUserIdFromToken(GetToken());
             bool isOwner = result.Data.CreatedBy == userId;
 
-            var allStaff = (await _staffService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
+            var allStaff = (await _staffService.GetAllAsync(id, GetToken()))?.Data?.Items ?? new();
+            var pagedStaffResult = await _staffService.GetAllAsync(id, page, pageSize, GetToken());
             var orgStaff = allStaff.Where(s => s.OrganizationId == id && s.IsActive).ToList();
 
             var allUsers = (await _userService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
-            ViewBag.Staff = orgStaff
+            ViewBag.Staff = (pagedStaffResult?.Data?.Items ?? new())
                 .Select(s => new {
                     Staff = s,
                     Username = allUsers.FirstOrDefault(u => u.Id == s.UserId)?.Username ?? s.UserId.ToString()
                 })
                 .ToList();
+            ViewBag.StaffPager = pagedStaffResult?.Data?.Pager;
+            ViewBag.StaffCurrentPage = page;
+            ViewBag.StaffPageSize = pageSize;
             ViewBag.OwnerUsername = allUsers.FirstOrDefault(u => u.Id == result.Data.CreatedBy)?.Username
                         ?? result.Data.CreatedBy.ToString();
 
@@ -108,13 +119,14 @@ namespace EArenaTournamentManager.Web.Controllers
 
             if (result?.IsSuccess is true)
             {
+                await PromoteCurrentUserToOrganizerAsync();
                 return RedirectToAction("Index");
             }
 
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to create a organization." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
             return View(request);
-        }
+        }        
 
         public async Task<IActionResult> Edit(int id)
         {
@@ -205,6 +217,37 @@ namespace EArenaTournamentManager.Web.Controllers
 
             await _organizationService.DeleteAsync(id, GetToken());
             return RedirectToAction("Index");
+        }
+
+        private async Task PromoteCurrentUserToOrganizerAsync()
+        {
+            var userId = ExtractUserIdFromToken(GetToken());
+            if (!userId.HasValue)
+            {
+                return;
+            }
+
+            var currentUser = await _userService.GetByIdAsync(userId.Value, GetToken());
+            if (currentUser?.Data is null)
+            {
+                return;
+            }
+
+            if (string.Equals(currentUser.Data.Role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(currentUser.Data.Role, "Organizer", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var updateRequest = new UserRequest
+            {
+                Username = currentUser.Data.Username,
+                Email = currentUser.Data.Email,
+                AvatarImageUrl = currentUser.Data.AvatarImageUrl,
+                Role = "Organizer"
+            };
+
+            await _userService.UpdateAsync(userId.Value, updateRequest, GetToken());
         }
     }
 }

@@ -21,19 +21,35 @@ namespace EArenaTournamentManager.Web.Controllers
             _memberService = memberService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? name, string? captainUsername, int page = 1, int pageSize = 10)
         {
             if (!IsLoggedIn())
             {
                 return RedirectToAction("Login", "Auth");
             }
 
-            var result = await _teamService.GetAllAsync(GetToken());
+            ViewBag.NameFilter = name;
+            ViewBag.CaptainUsernameFilter = captainUsername;
+
+            int? captainId = null;
+            if (!string.IsNullOrWhiteSpace(captainUsername))
+            {
+                var user = await _userService.GetByUsernameAsync(captainUsername, GetToken());
+                if (user is not null)
+                {
+                    captainId = user.Id;
+                }
+            }
+
+            var result = await _teamService.GetAllAsync(name, captainId, page, pageSize, GetToken());
             var items = result?.Data?.Items ?? new();
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Pager = result?.Data?.Pager;
             return View(items);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, int page = 1, int pageSize = 10)
         {
             if (!IsLoggedIn())
             {
@@ -58,15 +74,20 @@ namespace EArenaTournamentManager.Web.Controllers
             ViewBag.CaptainUsername = captain?.Data?.Username ?? result.Data.CaptainId.ToString();
 
 
-            var allMembers = (await _memberService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
+            var allMembers = (await _memberService.GetAllAsync(id, GetToken()))?.Data?.Items ?? new();
+            var pagedMembersResult = await _memberService.GetAllAsync(id, page, pageSize, GetToken());
             var teamMembers = allMembers.Where(m => m.TeamId == id && m.IsActive).ToList();
 
             var allUsers = (await _userService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
-            ViewBag.Members = teamMembers
+            ViewBag.Members = (pagedMembersResult?.Data?.Items ?? new())
                 .Select(m => new {
                     Member = m,
                     Username = allUsers.FirstOrDefault(u => u.Id == m.UserId)?.Username ?? m.UserId.ToString()
                 }).ToList();
+            ViewBag.MembersPager = pagedMembersResult?.Data?.Pager;
+            ViewBag.MembersCurrentPage = page;
+            ViewBag.MembersPageSize = pageSize;
+            ViewBag.IsTeamMember = teamMembers.Any(m => m.UserId == ExtractUserIdFromToken(GetToken()));
 
             var memberUserIds = teamMembers.Select(m => m.UserId).ToHashSet();
             memberUserIds.Add(result.Data.CaptainId);

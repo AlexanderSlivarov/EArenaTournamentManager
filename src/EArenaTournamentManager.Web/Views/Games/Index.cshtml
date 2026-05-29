@@ -1,7 +1,98 @@
 ﻿@model List<EArenaTournamentManager.Web.Models.Games.GameResponse>
 @{
     ViewData["Title"] = "Games";
+    var nameFilter = ViewBag.NameFilter as string ?? string.Empty;
+    var platformFilter = ViewBag.PlatformFilter as string ?? string.Empty;
+    var currentPage = ViewBag.CurrentPage is int pageNumber ? pageNumber : 1;
+    var pageSize = ViewBag.PageSize is int size ? size : 10;
+    var pager = ViewBag.Pager as EArenaTournamentManager.Web.Models.Shared.PagerResponse;
+    var totalCount = pager?.Count ?? Model.Count;
+    var totalPages = pageSize > 0 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 1;
+    if (totalPages < 1)
+    {
+        totalPages = 1;
+    }
+    var pageSizes = new[] { 5, 10, 25, 50 };
 }
+<form method="get" class="card card-body mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" value="@nameFilter" class="form-control" placeholder="Search games" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Platform</label>
+            <select name="platform" class="form-select">
+                @if (string.IsNullOrWhiteSpace(platformFilter))
+                {
+                    <option value="" selected>All platforms</option>
+                }
+                else
+                {
+                    <option value="">All platforms</option>
+                }
+
+                @if (string.Equals(platformFilter, "PC", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="PC" selected>PC</option>
+                }
+                else
+                {
+                    <option value="PC">PC</option>
+                }
+
+                @if (string.Equals(platformFilter, "PlayStation4", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="PlayStation4" selected>PlayStation 4</option>
+                }
+                else
+                {
+                    <option value="PlayStation4">PlayStation 4</option>
+                }
+
+                @if (string.Equals(platformFilter, "XBoxOne", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="XBoxOne" selected>Xbox One</option>
+                }
+                else
+                {
+                    <option value="XBoxOne">Xbox One</option>
+                }
+
+                @if (string.Equals(platformFilter, "Mobile", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Mobile" selected>Mobile</option>
+                }
+                else
+                {
+                    <option value="Mobile">Mobile</option>
+                }
+
+                @if (string.Equals(platformFilter, "Switch", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Switch" selected>Switch</option>
+                }
+                else
+                {
+                    <option value="Switch">Switch</option>
+                }
+
+                @if (string.Equals(platformFilter, "CrossPlatform", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="CrossPlatform" selected>Cross Platform</option>
+                }
+                else
+                {
+                    <option value="CrossPlatform">Cross Platform</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </div>
+</form>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Games</h2>
     @if (ViewBag.IsAdmin == true)
@@ -59,3 +150,49 @@ else
         }
     </div>
 }
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mt-4">
+    <div class="text-muted">
+        Page @currentPage / @totalPages
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <label for="gamePageSize" class="text-muted mb-0">Page size</label>
+            <form method="get" class="d-inline">
+                <input type="hidden" name="name" value="@nameFilter" />
+                <input type="hidden" name="platform" value="@platformFilter" />
+                <input type="hidden" name="page" value="1" />
+                <select id="gamePageSize" name="pageSize" class="form-select" onchange="this.form.submit()" style="width:auto;min-width:110px;">
+                    @foreach (var sizeOption in pageSizes)
+                    {
+                        if (sizeOption == pageSize)
+                        {
+                            <option value="@sizeOption" selected>@sizeOption</option>
+                        }
+                        else
+                        {
+                            <option value="@sizeOption">@sizeOption</option>
+                        }
+                    }
+                </select>
+            </form>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary @(currentPage <= 1 ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-name="@nameFilter"
+               asp-route-platform="@platformFilter"
+               asp-route-page="@(currentPage - 1)"
+               asp-route-pageSize="@pageSize">Prev</a>
+
+            <a class="btn btn-outline-secondary @(currentPage >= totalPages ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-name="@nameFilter"
+               asp-route-platform="@platformFilter"
+               asp-route-page="@(currentPage + 1)"
+               asp-route-pageSize="@pageSize">Next</a>
+        </div>
+    </div>
+</div>

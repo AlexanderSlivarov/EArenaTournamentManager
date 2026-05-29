@@ -2,6 +2,7 @@
 using EArenaTournamentManager.Web.Models.Tournaments;
 using EArenaTournamentManager.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace EArenaTournamentManager.Web.Controllers
 {
@@ -22,16 +23,32 @@ namespace EArenaTournamentManager.Web.Controllers
             _participantService = participantService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? name, int? gameId, int? organizationId, string? status, string? region, string? dateFrom, string? dateTo, int page = 1, int pageSize = 10)
         {
-            var result = await _tournamentService.GetAllAsync(GetToken());
+            ViewBag.NameFilter = name;
+            ViewBag.GameIdFilter = gameId;
+            ViewBag.OrganizationIdFilter = organizationId;
+            ViewBag.StatusFilter = status;
+            ViewBag.RegionFilter = region;
+            ViewBag.DateFromFilter = dateFrom;
+            ViewBag.DateToFilter = dateTo;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+
+            var parsedDateFrom = ParseDateFilter(dateFrom, endOfDay: false);
+            var parsedDateTo = ParseDateFilter(dateTo, endOfDay: true);
+
+            await PopulateGameAndOrganizationViewBags();
+
+            var result = await _tournamentService.GetAllAsync(gameId, organizationId, name, status, region, parsedDateFrom, parsedDateTo, page, pageSize, GetToken());
             var items = result?.Data?.Items ?? new();
+            ViewBag.Pager = result?.Data?.Pager;
             ViewBag.CanCreateTournament = await CanManageTournamentsAsync();
 
             return View(items);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, int page = 1, int pageSize = 10)
         {
             var result = await _tournamentService.GetByIdAsync(id, GetToken());
 
@@ -53,14 +70,13 @@ namespace EArenaTournamentManager.Web.Controllers
                 ViewBag.OrganizationName = org?.Data?.Name ?? result.Data.OrganizationId.ToString();
             }
 
-            var allParticipants = (await _participantService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
-            var tournamentParticipants = allParticipants
-                .Where(p => p.TournamentId == id)
-                .ToList();
+            var allParticipants = (await _participantService.GetAllAsync(id, GetToken()))?.Data?.Items ?? new();
+            var pagedParticipantsResult = await _participantService.GetAllAsync(id, page, pageSize, GetToken());
+            var tournamentParticipants = allParticipants.ToList();
 
             var allTeams = (await _teamService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
 
-            ViewBag.Participants = tournamentParticipants
+            ViewBag.Participants = (pagedParticipantsResult?.Data?.Items ?? new())
                 .Select(p => new
                 {
                     p.Id,
@@ -69,6 +85,9 @@ namespace EArenaTournamentManager.Web.Controllers
                     TeamName = allTeams.FirstOrDefault(t => t.Id == p.TeamId)?.Name ?? $"Team #{p.TeamId}"
                 })
                 .ToList();
+            ViewBag.ParticipantsPager = pagedParticipantsResult?.Data?.Pager;
+            ViewBag.ParticipantsCurrentPage = page;
+            ViewBag.ParticipantsPageSize = pageSize;
 
             if (IsLoggedIn())
             {
@@ -322,6 +341,25 @@ namespace EArenaTournamentManager.Web.Controllers
             }
 
             return false;
+        }
+
+        private static long? ParseDateFilter(string? value, bool endOfDay)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsedDate))
+            {
+                return null;
+            }
+
+            var normalizedDate = endOfDay
+                ? parsedDate.Date.AddDays(1).AddSeconds(-1)
+                : parsedDate.Date;
+
+            return new DateTimeOffset(normalizedDate).ToUnixTimeSeconds();
         }
     }
 }

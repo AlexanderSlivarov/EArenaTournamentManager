@@ -36,15 +36,25 @@ namespace EArenaTournamentManager.Web.Controllers
             _tournamentParticipantService = tournamentParticipantService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? username, string? email, string? role, int page = 1, int pageSize = 10)
         {
             if (!IsLoggedIn())
             {
                 return RedirectToAction("Login", "Auth");
             }
 
-            var result = await _userService.GetAllAsync(GetToken());
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            ViewBag.UsernameFilter = username;
+            ViewBag.EmailFilter = email;
+            ViewBag.RoleFilter = role;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+
+            var result = await _userService.GetAllAsync(username, email, role, page, pageSize, GetToken());
             var items = result?.Data?.Items ?? new();
+            ViewBag.Pager = result?.Data?.Pager;
             return View(items);
         }
 

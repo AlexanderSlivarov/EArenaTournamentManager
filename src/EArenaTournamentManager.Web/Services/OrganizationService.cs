@@ -13,6 +13,23 @@ namespace EArenaTournamentManager.Web.Services
             return await GetJsonAsync<ServiceResult<PagedData<OrganizationResponse>>>("/api/organizations", token);
         }
 
+        public async Task<ServiceResult<PagedData<OrganizationResponse>>?> GetAllAsync(string? name, string? type, string? token = null)
+        {
+            return await GetAllAsync(name, type, null, null, token);
+        }
+
+        public async Task<ServiceResult<PagedData<OrganizationResponse>>?> GetAllAsync(string? name, string? type, int? page, int? pageSize, string? token = null)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(name)) parts.Add($"Filter.Name={Uri.EscapeDataString(name)}");
+            if (!string.IsNullOrWhiteSpace(type)) parts.Add($"Filter.Type={Uri.EscapeDataString(type)}");
+            if (page.HasValue && page.Value > 0) parts.Add($"Pager.Page={page.Value}");
+            if (pageSize.HasValue && pageSize.Value > 0) parts.Add($"Pager.PageSize={pageSize.Value}");
+
+            var uri = parts.Count > 0 ? $"/api/organizations?{string.Join("&", parts)}" : "/api/organizations";
+            return await GetJsonAsync<ServiceResult<PagedData<OrganizationResponse>>>(uri, token);
+        }
+
         public async Task<ServiceResult<OrganizationResponse>?> GetByIdAsync(int id, string? token = null)
         {
             return await GetJsonAsync<ServiceResult<OrganizationResponse>>($"/api/organizations/{id}", token);

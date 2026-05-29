@@ -13,6 +13,22 @@ namespace EArenaTournamentManager.Web.Services
             return await GetJsonAsync<ServiceResult<PagedData<TournamentParticipantResponse>>>("/api/tournamentparticipants", token);
         }
 
+        public async Task<ServiceResult<PagedData<TournamentParticipantResponse>>?> GetAllAsync(int? tournamentId, string? token = null)
+        {
+            return await GetAllAsync(tournamentId, null, null, token);
+        }
+
+        public async Task<ServiceResult<PagedData<TournamentParticipantResponse>>?> GetAllAsync(int? tournamentId, int? page, int? pageSize, string? token = null)
+        {
+            var parts = new List<string>();
+            if (tournamentId.HasValue && tournamentId.Value > 0) parts.Add($"Filter.TournamentId={tournamentId.Value}");
+            if (page.HasValue && page.Value > 0) parts.Add($"Pager.Page={page.Value}");
+            if (pageSize.HasValue && pageSize.Value > 0) parts.Add($"Pager.PageSize={pageSize.Value}");
+
+            var uri = parts.Count > 0 ? $"/api/tournamentparticipants?{string.Join("&", parts)}" : "/api/tournamentparticipants";
+            return await GetJsonAsync<ServiceResult<PagedData<TournamentParticipantResponse>>>(uri, token);
+        }
+
         public async Task<ServiceResult<TournamentParticipantResponse>?> GetByIdAsync(int id, string? token = null)
         {
             return await GetJsonAsync<ServiceResult<TournamentParticipantResponse>>($"/api/tournamentparticipants/{id}", token);

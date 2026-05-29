@@ -13,6 +13,23 @@ namespace EArenaTournamentManager.Web.Services
             return await GetJsonAsync<ServiceResult<PagedData<GameResponse>>>("/api/games", token);
         }
 
+        public async Task<ServiceResult<PagedData<GameResponse>>?> GetAllAsync(string? name, string? platform, string? token = null)
+        {
+            return await GetAllAsync(name, platform, null, null, token);
+        }
+
+        public async Task<ServiceResult<PagedData<GameResponse>>?> GetAllAsync(string? name, string? platform, int? page, int? pageSize, string? token = null)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(name)) parts.Add($"Filter.Name={Uri.EscapeDataString(name)}");
+            if (!string.IsNullOrWhiteSpace(platform)) parts.Add($"Filter.Platform={Uri.EscapeDataString(platform)}");
+            if (page.HasValue && page.Value > 0) parts.Add($"Pager.Page={page.Value}");
+            if (pageSize.HasValue && pageSize.Value > 0) parts.Add($"Pager.PageSize={pageSize.Value}");
+
+            var uri = parts.Count > 0 ? $"/api/games?{string.Join("&", parts)}" : "/api/games";
+            return await GetJsonAsync<ServiceResult<PagedData<GameResponse>>>(uri, token);
+        }
+
         public async Task<ServiceResult<GameResponse>?> GetByIdAsync(int id, string? token = null)
         {
             return await GetJsonAsync<ServiceResult<GameResponse>>($"/api/games/{id}", token);

@@ -16,7 +16,6 @@ namespace EArenaTournamentManager.Application.RequestDTOs.Tournaments
         public RegistrationStatus? Status { get; set; }
 
         public string? Region { get; set; }
-        public string? Format { get; set; }
 
         public long? DateFrom { get; set; }
         public long? DateTo { get; set; }

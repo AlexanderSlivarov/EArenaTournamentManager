@@ -15,10 +15,14 @@ namespace EArenaTournamentManager.Web.Controllers
             _teamService = teamService;
         }
         
-        public async Task<IActionResult> Index(int tournamentId)
+        public async Task<IActionResult> Index(int tournamentId, int page = 1, int pageSize = 10)
         {
-            var result = await _participantService.GetAllAsync(GetToken());
+            var result = await _participantService.GetAllAsync(tournamentId, page, pageSize, GetToken());
             var items = result?.Data?.Items ?? new();
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Pager = result?.Data?.Pager;
+            ViewBag.TournamentId = tournamentId;
             return View(items);
         }
 

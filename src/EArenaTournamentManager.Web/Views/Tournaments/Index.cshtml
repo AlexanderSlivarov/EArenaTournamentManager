@@ -2,6 +2,150 @@
 @{
     ViewData["Title"] = "Tournaments";
 }
+@{
+    var nameFilter = ViewBag.NameFilter as string ?? string.Empty;
+    var gameIdFilter = ViewBag.GameIdFilter as int?;
+    var orgIdFilter = ViewBag.OrganizationIdFilter as int?;
+    var statusFilter = ViewBag.StatusFilter as string ?? string.Empty;
+    var regionFilter = ViewBag.RegionFilter as string ?? string.Empty;
+    var dateFromFilter = ViewBag.DateFromFilter as string ?? string.Empty;
+    var dateToFilter = ViewBag.DateToFilter as string ?? string.Empty;
+    var currentPage = ViewBag.CurrentPage is int pageNumber ? pageNumber : 1;
+    var pageSize = ViewBag.PageSize is int size ? size : 10;
+    var pager = ViewBag.Pager as EArenaTournamentManager.Web.Models.Shared.PagerResponse;
+    var totalCount = pager?.Count ?? Model.Count;
+    var totalPages = pageSize > 0 ? (int)Math.Ceiling(totalCount / (double)pageSize) : 1;
+    if (totalPages < 1)
+    {
+        totalPages = 1;
+    }
+    var pageSizes = new[] { 5, 10, 25, 50 };
+    var games = ViewBag.Games as List<EArenaTournamentManager.Web.Models.Games.GameResponse> ?? new();
+    var orgs = ViewBag.Organizations as List<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse> ?? new();
+}
+<form method="get" class="card card-body mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" value="@nameFilter" class="form-control" placeholder="Search tournaments" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Game</label>
+            <select name="gameId" class="form-select">
+                @if (!gameIdFilter.HasValue || gameIdFilter == 0)
+                {
+                    <option value="" selected>All games</option>
+                }
+                else
+                {
+                    <option value="">All games</option>
+                }
+                @foreach (var g in games)
+                {
+                    if (gameIdFilter.HasValue && gameIdFilter.Value == g.Id)
+                    {
+                        <option value="@g.Id" selected>@g.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@g.Id">@g.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Organization</label>
+            <select name="organizationId" class="form-select">
+                @if (!orgIdFilter.HasValue || orgIdFilter == 0)
+                {
+                    <option value="" selected>All orgs</option>
+                }
+                else
+                {
+                    <option value="">All orgs</option>
+                }
+                @foreach (var o in orgs)
+                {
+                    if (orgIdFilter.HasValue && orgIdFilter.Value == o.Id)
+                    {
+                        <option value="@o.Id" selected>@o.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@o.Id">@o.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                @if (string.IsNullOrWhiteSpace(statusFilter))
+                {
+                    <option value="" selected>All</option>
+                }
+                else
+                {
+                    <option value="">All</option>
+                }
+
+                @if (string.Equals(statusFilter, "Open", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Open" selected>Open</option>
+                }
+                else
+                {
+                    <option value="Open">Open</option>
+                }
+
+                @if (string.Equals(statusFilter, "Upcoming", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Upcoming" selected>Upcoming</option>
+                }
+                else
+                {
+                    <option value="Upcoming">Upcoming</option>
+                }
+
+                @if (string.Equals(statusFilter, "Closed", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Closed" selected>Closed</option>
+                }
+                else
+                {
+                    <option value="Closed">Closed</option>
+                }
+
+                @if (string.Equals(statusFilter, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                {
+                    <option value="Cancelled" selected>Cancelled</option>
+                }
+                else
+                {
+                    <option value="Cancelled">Cancelled</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2 align-items-end">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </div>
+    <div class="row g-3 mt-2">
+        <div class="col-md-4">
+            <label class="form-label">Region</label>
+            <input type="text" name="region" value="@regionFilter" class="form-control" placeholder="Region" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Date from</label>
+            <input type="date" name="dateFrom" value="@dateFromFilter" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Date to</label>
+            <input type="date" name="dateTo" value="@dateToFilter" class="form-control" />
+        </div>
+    </div>
+</form>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Tournaments</h2>
     @if (ViewBag.IsAdmin == true || ViewBag.IsOrganizer == true)
@@ -78,3 +222,64 @@ else
         }
     </div>
 }
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mt-4">
+    <div class="text-muted">
+        Page @currentPage / @totalPages
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <label for="tournamentPageSize" class="text-muted mb-0">Page size</label>
+            <form method="get" class="d-inline">
+                <input type="hidden" name="name" value="@nameFilter" />
+                <input type="hidden" name="gameId" value="@gameIdFilter" />
+                <input type="hidden" name="organizationId" value="@orgIdFilter" />
+                <input type="hidden" name="status" value="@statusFilter" />
+                <input type="hidden" name="region" value="@regionFilter" />
+                <input type="hidden" name="dateFrom" value="@dateFromFilter" />
+                <input type="hidden" name="dateTo" value="@dateToFilter" />
+                <input type="hidden" name="page" value="1" />
+                <select id="tournamentPageSize" name="pageSize" class="form-select" onchange="this.form.submit()" style="width:auto;min-width:110px;">
+                    @foreach (var sizeOption in pageSizes)
+                    {
+                        if (sizeOption == pageSize)
+                        {
+                            <option value="@sizeOption" selected>@sizeOption</option>
+                        }
+                        else
+                        {
+                            <option value="@sizeOption">@sizeOption</option>
+                        }
+                    }
+                </select>
+            </form>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary @(currentPage <= 1 ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-name="@nameFilter"
+               asp-route-gameId="@gameIdFilter"
+               asp-route-organizationId="@orgIdFilter"
+               asp-route-status="@statusFilter"
+               asp-route-region="@regionFilter"
+               asp-route-dateFrom="@dateFromFilter"
+               asp-route-dateTo="@dateToFilter"
+               asp-route-page="@(currentPage - 1)"
+               asp-route-pageSize="@pageSize">Prev</a>
+
+            <a class="btn btn-outline-secondary @(currentPage >= totalPages ? "disabled" : string.Empty)"
+               asp-action="Index"
+               asp-route-name="@nameFilter"
+               asp-route-gameId="@gameIdFilter"
+               asp-route-organizationId="@orgIdFilter"
+               asp-route-status="@statusFilter"
+               asp-route-region="@regionFilter"
+               asp-route-dateFrom="@dateFromFilter"
+               asp-route-dateTo="@dateToFilter"
+               asp-route-page="@(currentPage + 1)"
+               asp-route-pageSize="@pageSize">Next</a>
+        </div>
+    </div>
+</div>

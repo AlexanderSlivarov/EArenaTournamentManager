@@ -67,9 +67,6 @@ namespace EArenaTournamentManager.API.Controllers
                 (string.IsNullOrEmpty(model.Filter.Region) ||
                     (t.Region != null && t.Region.Contains(model.Filter.Region))) &&
 
-                (string.IsNullOrEmpty(model.Filter.Format) ||
-                    (t.Format != null && t.Format.Contains(model.Filter.Format))) &&
-
                 (!model.Filter.DateFrom.HasValue ||
                     (t.StartDate > 0 ? t.StartDate : t.DateTime) >= model.Filter.DateFrom.Value) &&
 
