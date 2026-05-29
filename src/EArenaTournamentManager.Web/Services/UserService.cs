@@ -16,7 +16,15 @@ namespace EArenaTournamentManager.Web.Services
         public async Task<ServiceResult<UserResponse>?> GetByIdAsync(int id, string? token = null)
         {
             return await GetJsonAsync<ServiceResult<UserResponse>>($"/api/users/{id}", token);
-        } 
+        }
+
+        public async Task<UserResponse?> GetByUsernameAsync(string username, string? token = null)
+        {
+            var result = await GetJsonAsync<ServiceResult<PagedData<UserResponse>>>($"/api/users?Filter.Username={Uri.EscapeDataString(username)}", token);
+
+            return result?.Data?.Items
+                .FirstOrDefault(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
+        }
 
         public async Task<ServiceResult<UserResponse>?> CreateAsync(UserRequest request, string? token = null)
         {

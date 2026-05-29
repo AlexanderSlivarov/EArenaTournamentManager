@@ -15,7 +15,7 @@
         </div>
     </div>
     <div class="d-flex gap-2">
-        @if (ViewBag.IsLoggedIn == true)
+        @if (ViewBag.IsAdmin == true)
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
             <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
@@ -37,7 +37,6 @@
         </div>
     </div>
 }
-
 @if (ViewBag.IsAdmin == true)
 {
     <div class="card mb-4">
@@ -49,9 +48,9 @@
                 <dt class="col-sm-3">Created On</dt>
                 <dd class="col-sm-9">@((Model.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(Model.CreatedOn).ToLocalTime().ToString("dd MMM yyyy HH:mm") : string.Empty)</dd>
                 <dt class="col-sm-3">Updated By</dt>
-                <dd class="col-sm-9">@(Model.UpdatedBy.HasValue ? Model.UpdatedBy.Value.ToString() : "-")</dd>
+                <dd class="col-sm-9">@(Model.UpdatedBy.HasValue? Model.UpdatedBy.Value.ToString() : "-")</dd>
                 <dt class="col-sm-3">Updated On</dt>
-                <dd class="col-sm-9">@(Model.UpdatedOn.HasValue ? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</dd>
+                <dd class="col-sm-9">@(Model.UpdatedOn.HasValue? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</dd>
                 <dt class="col-sm-3">Active</dt>
                 <dd class="col-sm-9">@(Model.IsActive ? "Yes" : "No")</dd>
             </dl>

@@ -39,11 +39,18 @@ else
                         {
                             <p class="card-text text-muted">@org.Description</p>
                         }
-                        <p class="card-text"><small class="text-muted">Created: @((org.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(org.CreatedOn).ToLocalTime().ToString("dd MMM yyyy") : string.Empty)</small></p>
+                        <p class="card-text">
+                            @if (ViewBag.IsAdmin == true)
+                            {
+                                <small class="text-muted">
+                                    Created: @((org.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(org.CreatedOn).ToLocalTime().ToString("dd MMM yyyy") : string.Empty)
+                                </small>
+                            }
+                        </p>
                     </div>
                     <div class="card-footer d-flex gap-2">
                         <a asp-action="Details" asp-route-id="@org.Id" class="btn btn-sm btn-outline-primary">Details</a>
-                        @if (ViewBag.IsLoggedIn == true)
+                        @if (ViewBag.IsAdmin == true || org.CreatedBy == ViewBag.CurrentUserId)
                         {
                             <a asp-action="Edit" asp-route-id="@org.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
                             <form asp-action="Delete" asp-route-id="@org.Id" method="post" class="d-inline">

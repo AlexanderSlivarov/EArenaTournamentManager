@@ -1,7 +1,30 @@
 ﻿@model EArenaTournamentManager.Web.Models.Teams.TeamResponse
 @{
     ViewData["Title"] = Model.Name;
+    var upcomingTournaments = ViewBag.UpcomingTournaments as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var pastTournaments = ViewBag.PastTournaments as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var members = ViewBag.Members as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var invitableUsers = ViewBag.InvitableUsers as IEnumerable<EArenaTournamentManager.Web.Models.Users.UserResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Users.UserResponse>();
+    bool isCaptain = Model.CaptainId == ViewBag.CurrentUserId;
+    bool isMember = isCaptain || members.Any(m => m.Member.UserId == ViewBag.CurrentUserId);
+    bool canManage = isCaptain || ViewBag.IsAdmin == true;
 }
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center gap-3">
         @if (!string.IsNullOrEmpty(Model.LogoImageUrl))
@@ -12,7 +35,7 @@
         <h2>@Model.Name</h2>
     </div>
     <div class="d-flex gap-2">
-        @if (ViewBag.IsLoggedIn == true)
+        @if (canManage)
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
             <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
@@ -25,12 +48,13 @@
         <a asp-action="Index" class="btn btn-outline-primary">Back to list</a>
     </div>
 </div>
+
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Team Info</h5>
-        <dl class="row">
-            <dt class="col-sm-3">Captain ID</dt>
-            <dd class="col-sm-9">@Model.CaptainId</dd>
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Captain</dt>
+            <dd class="col-sm-9">@ViewBag.CaptainUsername</dd>
             @if (!string.IsNullOrEmpty(Model.Description))
             {
                 <dt class="col-sm-3">Description</dt>
@@ -51,12 +75,206 @@
                 <dt class="col-sm-3">Created On</dt>
                 <dd class="col-sm-9">@((Model.CreatedOn > 0) ? DateTimeOffset.FromUnixTimeSeconds(Model.CreatedOn).ToLocalTime().ToString("dd MMM yyyy HH:mm") : string.Empty)</dd>
                 <dt class="col-sm-3">Updated By</dt>
-                <dd class="col-sm-9">@(Model.UpdatedBy.HasValue ? Model.UpdatedBy.Value.ToString() : "-")</dd>
+                <dd class="col-sm-9">@(Model.UpdatedBy.HasValue? Model.UpdatedBy.Value.ToString() : "-")</dd>
                 <dt class="col-sm-3">Updated On</dt>
-                <dd class="col-sm-9">@(Model.UpdatedOn.HasValue ? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</dd>
+                <dd class="col-sm-9">@(Model.UpdatedOn.HasValue? DateTimeOffset.FromUnixTimeSeconds(Model.UpdatedOn.Value).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</dd>
                 <dt class="col-sm-3">Active</dt>
                 <dd class="col-sm-9">@(Model.IsActive ? "Yes" : "No")</dd>
             </dl>
+        </div>
+    </div>
+}
+
+@* Members — visible to members, captain, and admin *@
+@if (isMember || canManage)
+{
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Members</h5>
+            <span class="badge bg-primary">@(members.Count() + 1)</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        @if (canManage)
+                        {
+                            <th></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>@ViewBag.CaptainUsername</strong></td>
+                        <td><span class="badge bg-warning text-dark">Captain</span></td>
+                        <td>—</td>
+                        @if (canManage)
+                        {
+                            <td></td>
+                        }
+                    </tr>
+                    @foreach (var entry in members)
+                    {
+                        <tr>
+                            <td>@entry.Username</td>
+                            <td>@(string.IsNullOrEmpty((string?)entry.Member.Role) ? "Member" : entry.Member.Role)</td>
+                            <td>@(entry.Member.JoinedOn > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Member.JoinedOn).ToLocalTime().ToString("dd MMM yyyy") : "-")</td>
+                            @if (canManage)
+                            {
+                                <td>
+                                    <form asp-controller="TeamMembers" asp-action="Delete" method="post">
+                                        <input type="hidden" name="id" value="@entry.Member.Id" />
+                                        <input type="hidden" name="teamId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Remove @entry.Username from the team?')">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (canManage)
+        {
+            <div class="card-footer">
+                <h6 class="mb-2">Add Member</h6>
+                @if (!invitableUsers.Any())
+                {
+                    <p class="text-muted mb-0 small">All users are already in this team.</p>
+                }
+                else
+                {
+                    <form asp-controller="TeamMembers" asp-action="Create" method="post"
+                          class="d-flex gap-2 align-items-end flex-wrap">
+                        <input type="hidden" name="TeamId" value="@Model.Id" />
+                        <div>
+                            <label class="form-label mb-1 small">User</label>
+                            <select name="UserId" class="form-select form-select-sm" style="min-width:180px;">
+                                @foreach (var user in invitableUsers)
+                                {
+                                    <option value="@user.Id">@user.Username</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label mb-1 small">Role (optional)</label>
+                            <input type="text" name="Role" class="form-control form-control-sm"
+                                   placeholder="e.g. Support" style="min-width:140px;" />
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
+}
+
+@* Tournaments — visible to members, captain, and admin *@
+@if (isMember || canManage)
+{
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Upcoming &amp; Active Tournaments</h5>
+            <span class="badge bg-primary">@upcomingTournaments.Count()</span>
+        </div>
+        <div class="card-body p-0">
+            @if (!upcomingTournaments.Any())
+            {
+                <p class="text-muted p-3 mb-0">This team has no upcoming tournaments.</p>
+            }
+            else
+            {
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tournament</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            @if (canManage)
+                            {
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in upcomingTournaments)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Tournaments" asp-action="Details" asp-route-id="@entry.Tournament.Id">
+                                        @entry.Tournament.Name
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-success">@entry.Tournament.Status</span></td>
+                                <td>@(entry.Tournament.StartDate > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Tournament.StartDate).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</td>
+                                <td>@(entry.Tournament.EndDate > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Tournament.EndDate).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</td>
+                                @if (canManage)
+                                {
+                                    <td>
+                                        <form asp-controller="TournamentParticipants" asp-action="Delete" method="post">
+                                            <input type="hidden" name="id" value="@entry.Participant.Id" />
+                                            <input type="hidden" name="tournamentId" value="@entry.Tournament.Id" />
+                                            <input type="hidden" name="teamId" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Unregister from @entry.Tournament.Name?')">
+                                                Unregister
+                                            </button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Past Tournaments</h5>
+            <span class="badge bg-secondary">@pastTournaments.Count()</span>
+        </div>
+        <div class="card-body p-0">
+            @if (!pastTournaments.Any())
+            {
+                <p class="text-muted p-3 mb-0">This team has no past tournaments.</p>
+            }
+            else
+            {
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tournament</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in pastTournaments)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Tournaments" asp-action="Details" asp-route-id="@entry.Tournament.Id">
+                                        @entry.Tournament.Name
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary">@entry.Tournament.Status</span></td>
+                                <td>@(entry.Tournament.StartDate > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Tournament.StartDate).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</td>
+                                <td>@(entry.Tournament.EndDate > 0 ? DateTimeOffset.FromUnixTimeSeconds((long)entry.Tournament.EndDate).ToLocalTime().ToString("dd MMM yyyy HH:mm") : "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         </div>
     </div>
 }

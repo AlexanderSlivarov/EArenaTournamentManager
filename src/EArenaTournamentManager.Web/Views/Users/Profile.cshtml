@@ -3,6 +3,7 @@
     ViewData["Title"] = "Profile";
     var profileUser = ViewBag.ProfileUser as EArenaTournamentManager.Web.Models.Users.UserResponse;
     var myTeams = ViewBag.MyTeams as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var myOrgs = ViewBag.MyOrganizations as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
 }
 
 <div class="row justify-content-center">
@@ -68,6 +69,54 @@
 
         <div class="mt-4">
             <div class="d-flex align-items-center justify-content-between mb-2">
+                <h3 class="h5 mb-0">My organizations</h3>
+                <span class="badge text-bg-secondary">@myOrgs.Count()</span>
+            </div>
+
+            @if (myOrgs.Any())
+            {
+                <div class="row g-3 mb-4">
+                    @foreach (var org in myOrgs)
+                    {
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body d-flex gap-3">
+                                    @if (!string.IsNullOrWhiteSpace((string?)org.LogoImageUrl))
+                                    {
+                                        <img src="@org.LogoImageUrl" alt="@org.Name"
+                                             style="width:56px;height:56px;object-fit:cover;border-radius:12px;" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width:56px;height:56px;border-radius:12px;background:#6c757d;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;">
+                                            @(((string)org.Name)[0].ToString().ToUpper())
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between gap-2">
+                                            <div>
+                                                <h4 class="h6 mb-1">@org.Name</h4>
+                                                <div class="text-muted small">@org.Description</div>
+                                            </div>
+                                            <span class="badge text-bg-primary align-self-start">@org.Role</span>
+                                        </div>
+                                        <div class="mt-2 text-muted small">
+                                            Joined @DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(org.JoinedOn)).ToLocalTime().ToString("dd MMM yyyy")
+                                        </div>
+                                        <a class="stretched-link" asp-controller="Organizations" asp-action="Details" asp-route-id="@org.Id"></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-light border mb-4">No organizations yet.</div>
+            }
+
+            <div class="d-flex align-items-center justify-content-between mb-2">
                 <h3 class="h5 mb-0">My teams</h3>
                 <span class="badge text-bg-secondary">@myTeams.Count()</span>
             </div>
@@ -100,7 +149,7 @@
                                             <span class="badge text-bg-primary align-self-start">@team.Role</span>
                                         </div>
                                         <div class="mt-2 text-muted small">
-                                            Joined @DateTimeOffset.FromUnixTimeMilliseconds((long)team.JoinedOn).ToLocalTime().ToString("dd MMM yyyy")
+                                            Joined @DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(team.JoinedOn)).ToLocalTime().ToString("dd MMM yyyy")
                                         </div>
                                         <a class="stretched-link" asp-controller="Teams" asp-action="Details" asp-route-id="@team.Id"></a>
                                     </div>

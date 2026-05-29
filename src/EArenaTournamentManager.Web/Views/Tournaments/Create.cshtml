@@ -11,15 +11,33 @@
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="GameId" class="form-label"></label>
-                    <input asp-for="GameId" type="number" class="form-control" />
-                    <span asp-validation-for="GameId" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="OrganizationId" class="form-label"></label>
-                    <input asp-for="OrganizationId" type="number" class="form-control" />
-                    <span asp-validation-for="OrganizationId" class="text-danger"></span>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Game</label>
+                        <input type="hidden" asp-for="GameId" />
+                        @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
+                        {
+                            <select asp-for="GameName" class="form-select">
+                                @foreach (var game in (ViewBag.Games as IEnumerable<EArenaTournamentManager.Web.Models.Games.GameResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Games.GameResponse>()))
+                                {
+                                    <option value="@game.Name">@game.Name</option>
+                                }
+                            </select>                            
+                        }                       
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Organization</label>
+                        <input type="hidden" asp-for="OrganizationId" />
+                        @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
+                        {
+                            <select asp-for="OrganizationName" class="form-select">
+                                @foreach (var organization in (ViewBag.Organizations as IEnumerable<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse>()))
+                                {
+                                    <option value="@organization.Name">@organization.Name</option>
+                                }
+                            </select>
+                        }
+                    </div>
                 </div>
             </div>
 

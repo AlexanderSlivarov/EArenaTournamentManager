@@ -13,9 +13,23 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="CaptainId" class="form-label"></label>
-                <input asp-for="CaptainId" type="number" class="form-control" />
-                <span asp-validation-for="CaptainId" class="text-danger"></span>
+                <label class="form-label">Captain</label>
+                <input type="hidden" asp-for="CaptainId" />
+                @if (ViewBag.IsAdmin == true)
+                {
+                    <select asp-for="CaptainUsername" class="form-select">                        
+                        @foreach (var user in (ViewBag.Users as IEnumerable<EArenaTournamentManager.Web.Models.Users.UserResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Users.UserResponse>()))
+                        {
+                            <option value="@user.Username">@user.Username</option>
+                        }
+                    </select>
+                    <div class="form-text">Select the new captain of this team.</div>
+                }
+                else
+                {
+                    <input asp-for="CaptainUsername" class="form-control" readonly />
+                    <div class="form-text">You are the captain of this team.</div>
+                }
             </div>
             <div class="mb-3">
                 <label asp-for="Description" class="form-label"></label>

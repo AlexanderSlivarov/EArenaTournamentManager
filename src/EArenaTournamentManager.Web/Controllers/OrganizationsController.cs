@@ -7,22 +7,36 @@ namespace EArenaTournamentManager.Web.Controllers
     public class OrganizationsController : BaseController
     {
         private readonly OrganizationService _organizationService;
+        private readonly OrganizationStaffService _staffService;
+        private readonly UserService _userService;
+        private readonly TournamentService _tournamentService;
 
-        public OrganizationsController(OrganizationService organizationService)
+        public OrganizationsController(OrganizationService organizationService, OrganizationStaffService staffService, UserService userService, TournamentService tournamentService)
         {
             _organizationService = organizationService;
+            _staffService = staffService;
+            _userService = userService;
+            _tournamentService = tournamentService;
         }
 
         public async Task<IActionResult> Index()
         {
             var result = await _organizationService.GetAllAsync(GetToken());
             var items = result?.Data?.Items ?? new();
+
+            if (ViewBag.IsOrganizer == true || ViewBag.IsAdmin == true)
+            {
+                var userId = ExtractUserIdFromToken(GetToken());
+                ViewBag.MyOrganizationIds = items.Where(o => o.CreatedBy == userId).Select(o => o.Id).ToHashSet();
+            }
+
             return View(items);
         }
 
         public async Task<IActionResult> Details(int id)
-        {
+        {            
             var result = await _organizationService.GetByIdAsync(id, GetToken());
+
             if (result?.Data is null)
             {
                 return MissingResource(
@@ -34,16 +48,68 @@ namespace EArenaTournamentManager.Web.Controllers
                     "Organizations",
                     "Index");
             }
+
+            var userId = ExtractUserIdFromToken(GetToken());
+            bool isOwner = result.Data.CreatedBy == userId;
+
+            var allStaff = (await _staffService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
+            var orgStaff = allStaff.Where(s => s.OrganizationId == id && s.IsActive).ToList();
+
+            var allUsers = (await _userService.GetAllAsync(GetToken()))?.Data?.Items ?? new();
+            ViewBag.Staff = orgStaff
+                .Select(s => new {
+                    Staff = s,
+                    Username = allUsers.FirstOrDefault(u => u.Id == s.UserId)?.Username ?? s.UserId.ToString()
+                })
+                .ToList();
+            ViewBag.OwnerUsername = allUsers.FirstOrDefault(u => u.Id == result.Data.CreatedBy)?.Username
+                        ?? result.Data.CreatedBy.ToString();
+
+            var staffUserIds = orgStaff.Select(s => s.UserId).ToHashSet();
+            staffUserIds.Add(result.Data.CreatedBy);
+            ViewBag.InvitableUsers = allUsers.Where(u => !staffUserIds.Contains(u.Id) && !string.Equals(u.Username, "admin", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var allTournaments = (await _tournamentService.GetAllAsync(GetToken()))?.Data?.Items ?? new();            
+
+            ViewBag.UpcomingTournaments = allTournaments
+                .Where(t => t.OrganizationId == id && (t.EndDate == 0 || t.EndDate >= DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+                .OrderBy(t => t.StartDate)
+                .ToList();
+
+            ViewBag.PastTournaments = allTournaments
+                .Where(t => t.OrganizationId == id && t.EndDate > 0 && t.EndDate < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                .OrderByDescending(t => t.EndDate)
+                .ToList();
+
+            ViewBag.IsOwner = isOwner;
+
             return View(result.Data);
         }
 
-        public IActionResult Create() => View(new OrganizationRequest());
+        public IActionResult Create()
+        {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            return View(new OrganizationRequest());
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(OrganizationRequest request)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _organizationService.CreateAsync(request, GetToken());
-            if (result?.IsSuccess is true) return RedirectToAction("Index");
+
+            if (result?.IsSuccess is true)
+            {
+                return RedirectToAction("Index");
+            }
 
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to create a organization." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
@@ -52,7 +118,13 @@ namespace EArenaTournamentManager.Web.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _organizationService.GetByIdAsync(id, GetToken());
+
             if (result?.Data is null)
             {
                 return MissingResource(
@@ -63,6 +135,14 @@ namespace EArenaTournamentManager.Web.Controllers
                     "Back to Organizations",
                     "Organizations",
                     "Index");
+            }
+
+            var userId = ExtractUserIdFromToken(GetToken());
+
+            if (ViewBag.IsAdmin is not true && result.Data.CreatedBy != userId)
+            {
+                TempData["Error"] = "You can only edit your own organizations.";
+                return RedirectToAction("Details", new { id });
             }
 
             var request = new OrganizationRequest
@@ -73,14 +153,33 @@ namespace EArenaTournamentManager.Web.Controllers
                 HeaderImageUrl = result.Data.HeaderImageUrl,
                 Type = result.Data.Type
             };
+
             return View(request);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(int id, OrganizationRequest request)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var existing = await _organizationService.GetByIdAsync(id, GetToken());
+            var userId = ExtractUserIdFromToken(GetToken());
+
+            if (ViewBag.IsAdmin is not true && existing?.Data?.CreatedBy != userId)
+            {
+                TempData["Error"] = "You can only edit your own organizations.";
+                return RedirectToAction("Details", new { id });
+            }
+
             var result = await _organizationService.UpdateAsync(id, request, GetToken());
-            if (result?.IsSuccess is true) return RedirectToAction("Index");
+
+            if (result?.IsSuccess is true)
+            {
+                return RedirectToAction("Index");
+            }
 
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to update a organization." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
@@ -90,6 +189,20 @@ namespace EArenaTournamentManager.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var existing = await _organizationService.GetByIdAsync(id, GetToken());
+            var userId = ExtractUserIdFromToken(GetToken());
+
+            if (ViewBag.IsAdmin is not true && existing?.Data?.CreatedBy != userId)
+            {
+                TempData["Error"] = "You can only delete your own organizations.";
+                return RedirectToAction("Details", new { id });
+            }
+
             await _organizationService.DeleteAsync(id, GetToken());
             return RedirectToAction("Index");
         }

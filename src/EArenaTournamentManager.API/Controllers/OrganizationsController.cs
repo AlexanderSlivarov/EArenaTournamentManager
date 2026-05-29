@@ -1,4 +1,5 @@
 ﻿using EArenaTournamentManager.Application.RequestDTOs.Organizations;
+using EArenaTournamentManager.Application.RequestDTOs.Tournaments;
 using EArenaTournamentManager.Application.ResponseDTOs.Organizations;
 using EArenaTournamentManager.Application.Services.Interfaces.Organizations;
 using EArenaTournamentManager.Domain.Entities;
@@ -21,6 +22,14 @@ namespace EArenaTournamentManager.API.Controllers
     {
         public OrganizationsController(IOrganizationService organizationService) : base(organizationService)
         { }
+
+        [AllowAnonymous]
+        public override Task<IActionResult> Get([FromQuery] OrganizationGetRequest model)
+          => base.Get(model);
+
+        [AllowAnonymous]
+        public override Task<IActionResult> Get([FromRoute] int id)
+            => base.Get(id);
 
         protected override void PopulateEntity(Organization entity, OrganizationRequest model)
         {           

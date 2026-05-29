@@ -20,7 +20,9 @@ namespace EArenaTournamentManager.Web.Controllers
             ViewBag.IsLoggedIn = !string.IsNullOrEmpty(username);
             ViewBag.Role = role;
             ViewBag.IsAdmin = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
+            ViewBag.IsOrganizer = string.Equals(role, "Organizer", StringComparison.OrdinalIgnoreCase);
             ViewBag.IsMember = string.Equals(role, "Member", StringComparison.OrdinalIgnoreCase) || string.Equals(role, "User", StringComparison.OrdinalIgnoreCase);
+            ViewBag.CurrentUserId = ExtractUserIdFromToken(GetToken());
 
             base.OnActionExecuting(context);
         }

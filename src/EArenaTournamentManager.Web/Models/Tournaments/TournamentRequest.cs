@@ -3,7 +3,9 @@
     public class TournamentRequest
     {
         public int GameId { get; set; }
+        public string GameName { get; set; } = string.Empty;
         public int OrganizationId { get; set; }
+        public string OrganizationName { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? LogoImageUrl { get; set; }
         public string? Format { get; set; }

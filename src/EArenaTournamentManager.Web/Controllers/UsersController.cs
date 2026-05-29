@@ -4,7 +4,6 @@ using EArenaTournamentManager.Web.Models.Tournaments;
 using EArenaTournamentManager.Web.Models.Teams;
 using EArenaTournamentManager.Web.Models.Users;
 using EArenaTournamentManager.Web.Services;
-using System;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EArenaTournamentManager.Web.Controllers
@@ -39,6 +38,11 @@ namespace EArenaTournamentManager.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.GetAllAsync(GetToken());
             var items = result?.Data?.Items ?? new();
             return View(items);
@@ -46,6 +50,11 @@ namespace EArenaTournamentManager.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.GetByIdAsync(id, GetToken());
             if (result?.Data is null)
             {
@@ -65,11 +74,24 @@ namespace EArenaTournamentManager.Web.Controllers
             return View(result.Data);
         }
 
-        public IActionResult Create() => View(new UserRequest());
+        public IActionResult Create()
+        {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            return View(new UserRequest());
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(UserRequest request)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.CreateAsync(request, GetToken());
             if (result?.IsSuccess is true) return RedirectToAction("Index");
 
@@ -80,6 +102,11 @@ namespace EArenaTournamentManager.Web.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.GetByIdAsync(id, GetToken());
             if (result?.Data is null)
             {
@@ -128,6 +155,7 @@ namespace EArenaTournamentManager.Web.Controllers
             }
 
             await PopulateProfileTeamsAsync(userId.Value, GetToken());
+            await PopulateProfileOrganizationsAsync(userId.Value, GetToken());
             ViewBag.ProfileUser = result.Data;
             return View(new UserRequest
             {
@@ -171,6 +199,7 @@ namespace EArenaTournamentManager.Web.Controllers
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to update your profile." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
             await PopulateProfileTeamsAsync(userId.Value, GetToken());
+            await PopulateProfileOrganizationsAsync(userId.Value, GetToken());
             ViewBag.ProfileUser = currentUser.Data;
             return View(request);
         }
@@ -203,9 +232,46 @@ namespace EArenaTournamentManager.Web.Controllers
                 .ToList();
         }
 
+        private async Task PopulateProfileOrganizationsAsync(int userId, string? token)
+        {
+            var allOrgs = (await _organizationService.GetAllAsync(token))?.Data?.Items ?? new();
+            var allStaff = (await _organizationStaffService.GetAllAsync(token))?.Data?.Items ?? new();
+
+            var owned = allOrgs.Where(o => o.CreatedBy == userId).ToList();
+
+            var staffMemberships = allStaff
+                .Where(s => s.UserId == userId && s.IsActive)
+                .ToList();
+
+            var orgs = allOrgs
+                .Where(org => owned.Any(o => o.Id == org.Id) || staffMemberships.Any(s => s.OrganizationId == org.Id))
+                .Select(org =>
+                {
+                    var membership = staffMemberships.FirstOrDefault(s => s.OrganizationId == org.Id);
+                    return new
+                    {
+                        Id = org.Id,
+                        Name = org.Name,
+                        Description = org.Description,
+                        LogoImageUrl = org.LogoImageUrl,
+                        Role = owned.Any(o => o.Id == org.Id) ? "Owner" : membership?.Role.ToString() ?? "Staff",
+                        JoinedOn = membership?.JoinedOn ?? org.CreatedOn
+                    };
+                })
+                .OrderByDescending(o => o.JoinedOn)
+                .ToList();
+
+            ViewBag.MyOrganizations = orgs;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Edit(int id, UserRequest request)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.UpdateAsync(id, request, GetToken());
             if (result?.IsSuccess is true) return RedirectToAction("Index");
 
@@ -218,6 +284,11 @@ namespace EArenaTournamentManager.Web.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!IsLoggedIn())
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             var result = await _userService.DeleteAsync(id, GetToken());
             if (result?.IsSuccess is not true)
             {
@@ -232,6 +303,5 @@ namespace EArenaTournamentManager.Web.Controllers
 
             return RedirectToAction("Index");
         }
-
     }
 }

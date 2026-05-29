@@ -23,6 +23,7 @@ namespace EArenaTournamentManager.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _gameService.GetByIdAsync(id, GetToken());
+
             if (result?.Data is null)
             {
                 return MissingResource(
@@ -37,13 +38,30 @@ namespace EArenaTournamentManager.Web.Controllers
             return View(result.Data);
         }
 
-        public IActionResult Create() => View(new GameRequest());
+        public IActionResult Create()
+        {
+            if (ViewBag.IsAdmin is not true )
+            {
+                return RedirectToAction("Index");
+            }
+
+            return View(new GameRequest());
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(GameRequest request)
         {
+            if (ViewBag.IsAdmin is not true)
+            {
+                return RedirectToAction("Index");
+            }
+
             var result = await _gameService.CreateAsync(request, GetToken());
-            if (result?.IsSuccess is true) return RedirectToAction("Index");
+
+            if (result?.IsSuccess is true)
+            {
+                return RedirectToAction("Index");
+            }
 
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to create a game." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
@@ -52,7 +70,13 @@ namespace EArenaTournamentManager.Web.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
+            if (ViewBag.IsAdmin is not true)
+            {
+                return RedirectToAction("Index");
+            }
+
             var result = await _gameService.GetByIdAsync(id, GetToken());
+
             if (result?.Data is null)
             {
                 return MissingResource(
@@ -72,14 +96,24 @@ namespace EArenaTournamentManager.Web.Controllers
                 ImageUrl = result.Data.ImageUrl,
                 Platform = result.Data.Platform
             };
+
             return View(request);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(int id, GameRequest request)
         {
+            if (ViewBag.IsAdmin is not true)
+            {
+                return RedirectToAction("Index");
+            }
+
             var result = await _gameService.UpdateAsync(id, request, GetToken());
-            if (result?.IsSuccess is true) return RedirectToAction("Index");
+
+            if (result?.IsSuccess is true)
+            {
+                return RedirectToAction("Index");
+            }
 
             var errors = result?.Errors?.SelectMany(e => e.Messages) ?? new[] { "Failed to update a game." };
             ModelState.AddModelError(string.Empty, string.Join(" ", errors));
@@ -89,6 +123,11 @@ namespace EArenaTournamentManager.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            if (ViewBag.IsAdmin is not true)
+            {
+                return RedirectToAction("Index");
+            }
+
             await _gameService.DeleteAsync(id, GetToken());
             return RedirectToAction("Index");
         }

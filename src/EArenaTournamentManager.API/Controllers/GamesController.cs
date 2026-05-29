@@ -22,6 +22,14 @@ namespace EArenaTournamentManager.API.Controllers
         public GamesController(IGameService gameService) : base(gameService) 
         { }
 
+        [AllowAnonymous]
+        public override Task<IActionResult> Get([FromQuery] GameGetRequest model)
+            => base.Get(model);
+
+        [AllowAnonymous]
+        public override Task<IActionResult> Get([FromRoute] int id)
+            => base.Get(id);
+
         protected override void PopulateEntity(Game entity, GameRequest model)
         {            
             entity.Name = model.Name;
