@@ -1,4 +1,4 @@
-﻿@model EArenaTournamentManager.Web.Models.Tournaments.TournamentRequest
+@model EArenaTournamentManager.Web.Models.Tournaments.TournamentRequest
 @{
     ViewData["Title"] = "Create Tournament";
 }
@@ -11,33 +11,31 @@
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
             <div class="row">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Game</label>
-                        <input type="hidden" asp-for="GameId" />
-                        @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
-                        {
-                            <select asp-for="GameName" class="form-select">
-                                @foreach (var game in (ViewBag.Games as IEnumerable<EArenaTournamentManager.Web.Models.Games.GameResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Games.GameResponse>()))
-                                {
-                                    <option value="@game.Name">@game.Name</option>
-                                }
-                            </select>                            
-                        }                       
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Organization</label>
-                        <input type="hidden" asp-for="OrganizationId" />
-                        @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
-                        {
-                            <select asp-for="OrganizationName" class="form-select">
-                                @foreach (var organization in (ViewBag.Organizations as IEnumerable<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse>()))
-                                {
-                                    <option value="@organization.Name">@organization.Name</option>
-                                }
-                            </select>
-                        }
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Game</label>
+                    <input type="hidden" asp-for="GameId" />
+                    @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
+                    {
+                        <select asp-for="GameName" class="form-select">
+                            @foreach (var game in (ViewBag.Games as IEnumerable<EArenaTournamentManager.Web.Models.Games.GameResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Games.GameResponse>()))
+                            {
+                                <option value="@game.Name">@game.Name</option>
+                            }
+                        </select>
+                    }
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Organization</label>
+                    <input type="hidden" asp-for="OrganizationId" />
+                    @if (ViewBag.IsAdmin is true || ViewBag.IsOrganizer is true)
+                    {
+                        <select asp-for="OrganizationName" class="form-select">
+                            @foreach (var organization in (ViewBag.Organizations as IEnumerable<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse> ?? Enumerable.Empty<EArenaTournamentManager.Web.Models.Organizations.OrganizationResponse>()))
+                            {
+                                <option value="@organization.Name">@organization.Name</option>
+                            }
+                        </select>
+                    }
                 </div>
             </div>
 
@@ -126,52 +124,7 @@
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <script>
-        function bindImagePicker(fileInputId, hiddenInputId, previewId, maxWidth, maxHeight, quality) {
-            const fileInput = document.getElementById(fileInputId);
-            const hiddenInput = document.getElementById(hiddenInputId);
-            const preview = document.getElementById(previewId);
-
-            hiddenInput.value = preview.getAttribute('src') || '';
-            preview.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', function () {
-                const file = this.files && this.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = function () {
-                        const canvas = document.createElement('canvas');
-
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > maxWidth) {
-                            height = Math.round(height * maxWidth / width);
-                            width = maxWidth;
-                        }
-                        if (height > maxHeight) {
-                            width = Math.round(width * maxHeight / height);
-                            height = maxHeight;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-
-                        const compressed = canvas.toDataURL('image/jpeg', quality);
-                        hiddenInput.value = compressed;
-                        preview.src = compressed;
-                        preview.classList.remove('d-none');
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        bindImagePicker('logoFile', 'logoImageUrl', 'logoPreview', 400, 400, 0.8);
+        bindImagePicker('logoFile', 'logoImageUrl', 'logoPreview', 'tournaments');
 
         const startPicker = document.getElementById('startDatePicker');
         const endPicker = document.getElementById('endDatePicker');

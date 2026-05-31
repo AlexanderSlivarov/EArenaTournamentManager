@@ -53,26 +53,6 @@
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
     <script>
-        const avatarFile = document.getElementById('avatarFile');
-        const avatarImageUrl = document.getElementById('avatarImageUrl');
-        const avatarPreview = document.getElementById('avatarPreview');
-
-        avatarImageUrl.value = avatarPreview.getAttribute('src') || '';
-
-        avatarFile.addEventListener('change', function () {
-            const file = this.files && this.files[0];
-            if (!file) {
-                avatarImageUrl.value = avatarPreview.getAttribute('src') || '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                avatarImageUrl.value = event.target.result;
-                avatarPreview.src = event.target.result;
-                avatarPreview.classList.remove('d-none');
-            };
-            reader.readAsDataURL(file);
-        });
+        bindImagePicker('avatarFile', 'avatarImageUrl', 'avatarPreview', 'avatars');
     </script>
 }
