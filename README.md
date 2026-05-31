@@ -368,20 +368,6 @@ All tables inherit `CreatedBy`, `CreatedOn`, `UpdatedBy`, `UpdatedOn`, and `IsAc
 
 ---
 
-## Image Specifications
-
-| Entity | Field | Max Size | Quality |
-|---|---|---|---|
-| Game | Image | 800 × 600 | 0.70 |
-| Team | Logo | 400 × 400 | 0.80 |
-| Organization | Logo | 400 × 400 | 0.80 |
-| Organization | Header | 1200 × 400 | 0.75 |
-| User | Avatar | 300 × 300 | 0.85 |
-
-> **Quality** is the JPEG compression factor (0.0–1.0). Higher values produce sharper images at larger file sizes.
-
----
-
 ## Contributing
 
 1. Fork the repository

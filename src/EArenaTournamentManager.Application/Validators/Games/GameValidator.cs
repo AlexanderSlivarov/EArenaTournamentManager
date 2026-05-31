@@ -17,8 +17,7 @@ namespace EArenaTournamentManager.Application.Validators.Games
                 .When(x => !string.IsNullOrEmpty(x.Description));
 
             RuleFor(x => x.ImageUrl)
-                .MaximumLength(2048).WithMessage("Image URL must not exceed 2048 characters.")
-                .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                .MaximumLength(2048).WithMessage("Image URL must not exceed 2048 characters.")                
                 .WithMessage("ImageUrl must be a valid URL if provided.");
 
             RuleFor(x => x.Platform)
