@@ -116,6 +116,11 @@ namespace EArenaTournamentManager.API.Controllers
         [HttpPost]
         public virtual async Task<IActionResult> Post([FromBody] ERequest model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ServiceResultExtensions.Failure<EResponse>(null, ModelState));
+            }
+
             E newEntity = new E();
             PopulateEntity(newEntity, model);            
 
@@ -132,6 +137,11 @@ namespace EArenaTournamentManager.API.Controllers
         [HttpPut("{id}")]
         public virtual async Task<IActionResult> Put([FromRoute] int id, [FromBody] ERequest model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ServiceResultExtensions.Failure<EResponse>(null, ModelState));
+            }
+
             var entityForUpdate = await _entityService.GetByIdAsync(id);
 
             if (entityForUpdate.Data is null)
