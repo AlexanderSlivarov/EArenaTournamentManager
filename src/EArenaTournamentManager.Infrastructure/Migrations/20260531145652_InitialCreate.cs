@@ -5,7 +5,7 @@
 namespace EArenaTournamentManager.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,8 +61,8 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordSalt = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AvatarImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<long>(type: "bigint", nullable: false),
@@ -84,9 +84,12 @@ namespace EArenaTournamentManager.Infrastructure.Migrations
                     GameId = table.Column<int>(type: "int", nullable: false),
                     OrganizationId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LogoImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Format = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Map = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<long>(type: "bigint", nullable: false),
+                    EndDate = table.Column<long>(type: "bigint", nullable: false),
                     DateTime = table.Column<long>(type: "bigint", nullable: false),
                     Rules = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Prizes = table.Column<string>(type: "nvarchar(max)", nullable: true),

@@ -20,9 +20,13 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 var app = builder.Build();
 
-app.UseStaticFiles();
-
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+app.UseStaticFiles();
+app.UseCors("AllowFrontend");
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,10 +78,5 @@ while (retries > 0)
     }
 }
 
-app.UseCors("AllowFrontend");
-app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

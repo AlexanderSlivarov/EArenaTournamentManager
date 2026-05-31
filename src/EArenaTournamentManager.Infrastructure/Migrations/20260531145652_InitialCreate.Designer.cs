@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EArenaTournamentManager.Infrastructure.Migrations
 {
     [DbContext(typeof(EArenaAppDbContext))]
-    [Migration("20260527151121_AllChangesSoFar")]
-    partial class AllChangesSoFar
+    [Migration("20260531145652_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
