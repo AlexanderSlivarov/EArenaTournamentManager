@@ -20,11 +20,12 @@ namespace EArenaTournamentManager.Application.Validators.Tournaments
                 .MaximumLength(100).WithMessage("Tournament name cannot exceed 100 characters.");
 
             RuleFor(x => x.LogoImageUrl)
+                .MaximumLength(2048).WithMessage("Logo URL must not exceed 2048 characters.")
                 .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 .WithMessage("LogoImageUrl must be a valid URL if provided.");
 
             RuleFor(x => x.Format)
-                .MaximumLength(2000).WithMessage("Format cannot exceed 2000 characters.")
+                .MaximumLength(3000).WithMessage("Format cannot exceed 3000 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Format));
 
             RuleFor(x => x.Map)
@@ -40,7 +41,7 @@ namespace EArenaTournamentManager.Application.Validators.Tournaments
                 .When(x => !string.IsNullOrEmpty(x.Rules));
 
             RuleFor(x => x.Prizes)
-                .MaximumLength(1000).WithMessage("Prizes cannot exceed 1000 characters.")
+                .MaximumLength(2000).WithMessage("Prizes cannot exceed 2000 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Prizes));
 
             RuleFor(x => x.StartDate)

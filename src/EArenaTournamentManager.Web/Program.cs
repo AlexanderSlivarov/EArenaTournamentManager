@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("EArenaAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5086");
+    var apiBaseUrl = builder.Configuration["ApiBaseUrl"]!;
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 builder.Services.AddSession();

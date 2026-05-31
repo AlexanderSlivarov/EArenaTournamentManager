@@ -20,6 +20,7 @@ namespace EArenaTournamentManager.Application.Validators.Teams
                 .When(x => !string.IsNullOrEmpty(x.Description));
 
             RuleFor(x => x.LogoImageUrl)
+                .MaximumLength(2048).WithMessage("Logo URL must not exceed 2048 characters.")
                 .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 .WithMessage("LogoImageUrl must be a valid URL if provided.");
         }

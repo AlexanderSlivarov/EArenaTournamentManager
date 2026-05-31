@@ -59,10 +59,10 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
             {
                 entity.HasKey(u => u.Id);
 
-                entity.Property(u => u.Username).IsRequired();
-                entity.Property(u => u.PasswordHash).IsRequired();                
-                entity.Property(u => u.Email).IsRequired();
-                entity.Property(u => u.AvatarImageUrl).IsRequired(false);
+                entity.Property(u => u.Username).IsRequired().HasMaxLength(50);
+                entity.Property(u => u.PasswordHash).IsRequired().HasMaxLength(500);
+                entity.Property(u => u.Email).IsRequired().HasMaxLength(450);
+                entity.Property(u => u.AvatarImageUrl).IsRequired(false).HasMaxLength(2048);
 
                 entity.Property(u => u.Role)
                       .HasConversion<string>()
@@ -95,9 +95,9 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
             {
                 entity.HasKey(g => g.Id);
 
-                entity.Property(g => g.Name).IsRequired();
-                entity.Property(g => g.Description).IsRequired(false);
-                entity.Property(g => g.ImageUrl).IsRequired(false);
+                entity.Property(g => g.Name).IsRequired().HasMaxLength(100);
+                entity.Property(g => g.Description).IsRequired(false).HasMaxLength(300);
+                entity.Property(g => g.ImageUrl).IsRequired(false).HasMaxLength(2048);
 
                 entity.Property(g => g.Platform)
                        .HasConversion<string>()
@@ -119,9 +119,9 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
             {
                 entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.Name).IsRequired();
-                entity.Property(t => t.Description).IsRequired(false);
-                entity.Property(t => t.LogoImageUrl).IsRequired(false);
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+                entity.Property(t => t.Description).IsRequired(false).HasMaxLength(1000);
+                entity.Property(t => t.LogoImageUrl).IsRequired(false).HasMaxLength(2048);
 
                 entity.HasIndex(t => t.Name).IsUnique();
 
@@ -149,10 +149,10 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
             {
                 entity.HasKey(o => o.Id);
 
-                entity.Property(o => o.Name).IsRequired();
-                entity.Property(o => o.Description).IsRequired(false);
-                entity.Property(o => o.LogoImageUrl).IsRequired(false);
-                entity.Property(o => o.HeaderImageUrl).IsRequired(false);
+                entity.Property(o => o.Name).IsRequired().HasMaxLength(100);
+                entity.Property(o => o.Description).IsRequired(false).HasMaxLength(300);
+                entity.Property(o => o.LogoImageUrl).IsRequired(false).HasMaxLength(2048);
+                entity.Property(o => o.HeaderImageUrl).IsRequired(false).HasMaxLength(2048);
 
                 entity.Property(o => o.Type)
                       .HasConversion<string>()
@@ -179,16 +179,16 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
             {
                 entity.HasKey(t => t.Id);
 
-                entity.Property(t => t.Name).IsRequired();
-                        entity.Property(t => t.LogoImageUrl).IsRequired(false);
-                entity.Property(t => t.Format).IsRequired();
-                entity.Property(t => t.Map).IsRequired(false);
-                entity.Property(t => t.Region).IsRequired();
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+                entity.Property(t => t.LogoImageUrl).IsRequired(false).HasMaxLength(2048);
+                entity.Property(t => t.Format).IsRequired().HasMaxLength(3000);
+                entity.Property(t => t.Map).IsRequired(false).HasMaxLength(100);
+                entity.Property(t => t.Region).IsRequired().HasMaxLength(100);
                 entity.Property(t => t.StartDate).IsRequired();
                 entity.Property(t => t.EndDate).IsRequired();
                 entity.Property(t => t.DateTime).IsRequired();
-                entity.Property(t => t.Rules).IsRequired(false);
-                entity.Property(t => t.Prizes).IsRequired(false);
+                entity.Property(t => t.Rules).IsRequired(false).HasMaxLength(2000);
+                entity.Property(t => t.Prizes).IsRequired(false).HasMaxLength(2000);
 
                 entity.Property(t => t.Status)
                       .HasConversion<string>()
@@ -221,7 +221,7 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
                 entity.Property(tm => tm.UserId).IsRequired();
                 entity.Property(tm => tm.TeamId).IsRequired();
 
-                entity.Property(tm => tm.Role).IsRequired(false);
+                entity.Property(tm => tm.Role).IsRequired(false).HasMaxLength(50);
                 entity.Property(tm => tm.JoinedOn).IsRequired();
 
                 entity.HasIndex(tm => new { tm.UserId, tm.TeamId }).IsUnique();
@@ -254,7 +254,7 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
                 entity.Property(os => os.Role)
                       .HasConversion<string>()
                       .IsRequired();
-
+                   
                 entity.HasIndex(os => new { os.OrganizationId, os.UserId }).IsUnique();
 
                 entity.HasOne(os => os.Organization)

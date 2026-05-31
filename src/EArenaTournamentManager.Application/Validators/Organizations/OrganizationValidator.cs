@@ -18,10 +18,12 @@ namespace EArenaTournamentManager.Application.Validators.Organizations
                 .When(x => !string.IsNullOrEmpty(x.Description));
 
             RuleFor(x => x.LogoImageUrl)
+                .MaximumLength(2048).WithMessage("Logo URL must not exceed 2048 characters.")
                 .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 .WithMessage("LogoImageUrl must be a valid URL if provided.");
 
             RuleFor(x => x.HeaderImageUrl)
+                .MaximumLength(2048).WithMessage("Header image URL must not exceed 2048 characters.")
                 .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 .WithMessage("HeaderImageUrl must be a valid URL if provided.");
 
