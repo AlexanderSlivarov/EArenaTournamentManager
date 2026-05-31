@@ -26,10 +26,8 @@ namespace EArenaTournamentManager.Application.Validators.Users
                 .EmailAddress().WithMessage("Invalid email format.");
 
             RuleFor(x => x.AvatarImageUrl)
-                .MaximumLength(2048).WithMessage("Avatar URL must not exceed 2048 characters.")
-                .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                .WithMessage("AvatarImageUrl must be a valid URL if provided.");
-
+                .MaximumLength(2048).WithMessage("Image too large.");              
+                
             RuleFor(x => x.Role)
                 .IsInEnum().WithMessage("Invalid user role.");
         }
