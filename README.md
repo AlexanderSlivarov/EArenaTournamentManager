@@ -191,6 +191,26 @@ Additional variables configured in `docker-compose.yml`:
 
 ---
 
+## Local Configuration
+
+The project uses a local development configuration file:
+
+```text
+src/EArenaTournamentManager.API/appsettings.Development.json
+```
+
+This file is intentionally excluded from source control.
+
+Create it by copying:
+
+```text
+src/EArenaTournamentManager.API/appsettings.Development.example.json
+```
+
+and then update the values to match your local environment.
+
+---
+
 ## 🖥️ Running Without Docker
 
 ### Prerequisites
