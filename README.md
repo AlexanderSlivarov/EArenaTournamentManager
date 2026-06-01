@@ -215,25 +215,37 @@ Additional variables configured in `docker-compose.yml`:
    dotnet restore
    ```
 
-3. **Configure** `src/EArenaTournamentManager.API/appsettings.Development.json`:
-    ```json
-    {
-      "ConnectionStrings": {
-        "DefaultConnection": "Server=localhost,1433;Database=EArenaTournamentManagerDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
-      },
-      "Jwt": {
-        "Key": "your_super_secret_jwt_key_min_32_chars",
-        "Issuer": "EArenaTournamentManager",
-        "Audience": "EArenaTournamentManager",
-        "ExpiryHours": 10
-      },
-      "Seed": {
-        "AdminUsername": "admin",
-        "AdminEmail": "admin@earena.com",
-        "AdminPassword": "Admin@123!"
-      }
-    }
-    ```
+3. Create your local configuration file:
+
+```bash
+cp src/EArenaTournamentManager.API/appsettings.Development.example.json \
+   src/EArenaTournamentManager.API/appsettings.Development.json
+```
+
+4. Update the copied file with your local SQL Server connection string, JWT key, and administrator credentials.
+
+Example:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost,1433;Database=EArenaTournamentManagerDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "your_super_secret_jwt_key_min_32_chars",
+    "Issuer": "EArenaTournamentManager",
+    "Audience": "EArenaTournamentManager",
+    "ExpiryHours": 10
+  },
+  "Seed": {
+    "AdminUsername": "admin",
+    "AdminEmail": "admin@earena.com",
+    "AdminPassword": "Admin@123!"
+  }
+}
+```
+
+> The `appsettings.Development.json` file is ignored by Git and should remain local to your machine.
 
 4. **Run the API** — migrations and seeding happen automatically on startup:
     ```bash
