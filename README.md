@@ -238,8 +238,8 @@ and then update the values to match your local environment.
 3. Create your local configuration file:
 
 ```bash
-cp src/EArenaTournamentManager.API/appsettings.Development.example.json \
-   src/EArenaTournamentManager.API/appsettings.Development.json
+Copy-Item -Path ".\src\EArenaTournamentManager.API\appsettings.Development.example.json" `
+          -Destination ".\src\EArenaTournamentManager.API\appsettings.Development.json"
 ```
 
 4. Update the copied file with your local SQL Server connection string, JWT key, and administrator credentials.
