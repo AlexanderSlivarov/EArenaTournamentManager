@@ -25,9 +25,9 @@
 - [Getting Started with Docker](#-getting-started-with-docker)
 - [Environment Variables](#environment-variables)
 - [Running Without Docker](#️-running-without-docker)
+- [Testing](#-testing)
 - [Project Structure](#-project-structure)
 - [Database Schema](#database-schema)
-- [Image Specifications](#image-specifications)
 - [Contributing](#contributing)
 - [Support & Contact](#-support--contact)
 
@@ -95,6 +95,8 @@ The solution follows **Clean Architecture** with a strict one-way dependency cha
 ```
 
 `API / Web` → `Application` → `Domain`. Infrastructure implements Application interfaces and is only referenced by outer layers for DI wiring.
+
+> The `EArenaTournamentManager.Tests` project sits outside this chain — it references the Application layer to test services and validators in isolation without touching the database or HTTP layer.
 
 ---
 
@@ -266,6 +268,43 @@ Remove-Migration -StartupProject EArenaTournamentManager.API
 
 ---
 
+## 🧪 Testing
+
+Tests live in `tests/EArenaTournamentManager.Tests` and cover the **Application layer** — all services and validators are tested in isolation without touching the database or HTTP stack.
+
+### What's covered
+
+| Area | Test Files |
+|---|---|
+| **Services** | `AuthServiceTests`, `GameServiceTests`, `OrganizationServiceTests`, `OrganizationStaffServiceTests`, `TeamServiceTests`, `TeamMemberServiceTests`, `TournamentServiceTests`, `TournamentParticipantServiceTests`, `UserServiceTests` |
+| **Validators** | `GameValidatorTests`, `OrganizationValidatorTests`, `OrganizationStaffValidatorTests`, `TeamValidatorTests`, `TeamMemberValidatorTests`, `TournamentValidatorTests`, `TournamentParticipantValidationTests`, `UserValidatorTests`, `Auth/` (auth-specific validator tests) |
+
+### Run all tests
+
+```bash
+dotnet test
+```
+
+### Run only the test project
+
+```bash
+dotnet test tests/EArenaTournamentManager.Tests
+```
+
+### Run with detailed output
+
+```bash
+dotnet test --logger "console;verbosity=detailed"
+```
+
+### Run with coverage (requires `coverlet`)
+
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -340,7 +379,27 @@ EArenaTournamentManager/
 │           └── BaseEntity.cs                      # Id, CreatedBy, CreatedOn, UpdatedBy, UpdatedOn, IsActive
 │
 ├── tests/
-│   └── EArenaTournamentManager.Tests/             # Unit and integration tests
+│   └── EArenaTournamentManager.Tests/             # Unit tests for the Application layer
+│       ├── Services/                              # Service-level unit tests
+│       │   ├── AuthServiceTests.cs
+│       │   ├── GameServiceTests.cs
+│       │   ├── OrganizationServiceTests.cs
+│       │   ├── OrganizationStaffServiceTests.cs
+│       │   ├── TeamServiceTests.cs
+│       │   ├── TeamMemberServiceTests.cs
+│       │   ├── TournamentServiceTests.cs
+│       │   ├── TournamentParticipantServiceTests.cs
+│       │   └── UserServiceTests.cs
+│       └── Validators/                            # Validator unit tests
+│           ├── Auth/                              # Auth-specific validator tests
+│           ├── GameValidatorTests.cs
+│           ├── OrganizationValidatorTests.cs
+│           ├── OrganizationStaffValidatorTests.cs
+│           ├── TeamValidatorTests.cs
+│           ├── TeamMemberValidatorTests.cs
+│           ├── TournamentValidatorTests.cs
+│           ├── TournamentParticipantValidationTests.cs
+│           └── UserValidatorTests.cs
 │
 ├── .dockerignore
 ├── .gitignore
