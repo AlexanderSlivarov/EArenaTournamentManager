@@ -219,6 +219,7 @@ namespace EArenaTournamentManager.Web.Controllers
                 OrganizationId = result.Data.OrganizationId,
                 OrganizationName = organizationName,
                 Name = result.Data.Name,
+                FullDescription = result.Data.FullDescription,
                 LogoImageUrl = result.Data.LogoImageUrl,
                 Format = result.Data.Format,
                 Map = result.Data.Map,

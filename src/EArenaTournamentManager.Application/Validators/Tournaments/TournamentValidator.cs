@@ -19,6 +19,11 @@ namespace EArenaTournamentManager.Application.Validators.Tournaments
                 .MinimumLength(2).WithMessage("Tournament name must be at least 2 characters long.")
                 .MaximumLength(100).WithMessage("Tournament name cannot exceed 100 characters.");
 
+            RuleFor(x => x.FullDescription)
+                .NotEmpty().WithMessage("Tournament full description name is required.")
+                .MinimumLength(30).WithMessage("Tournament full description must be at least 30 characters long.")
+                .MaximumLength(1000).WithMessage("Tournament full description cannot exceed 1000 characters.");
+
             RuleFor(x => x.LogoImageUrl)
                 .MaximumLength(2048).WithMessage("Image too large.");
 

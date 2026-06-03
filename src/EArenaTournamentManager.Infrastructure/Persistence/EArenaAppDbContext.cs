@@ -180,6 +180,7 @@ namespace EArenaTournamentManager.Infrastructure.Persistence
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+                entity.Property(t => t.FullDescription).IsRequired().HasMaxLength(1000);
                 entity.Property(t => t.LogoImageUrl).IsRequired(false).HasMaxLength(2048);
                 entity.Property(t => t.Format).IsRequired().HasMaxLength(3000);
                 entity.Property(t => t.Map).IsRequired(false).HasMaxLength(100);

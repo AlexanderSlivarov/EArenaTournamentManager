@@ -35,6 +35,7 @@ namespace EArenaTournamentManager.API.Controllers
             entity.GameId = model.GameId;
             entity.OrganizationId = model.OrganizationId;
             entity.Name = model.Name;
+            entity.FullDescription = model.FullDescription;
             entity.LogoImageUrl = model.LogoImageUrl;
             entity.Format = model.Format;
             entity.Map = model.Map;
@@ -87,6 +88,7 @@ namespace EArenaTournamentManager.API.Controllers
                 GameId = entity.GameId,
                 OrganizationId = entity.OrganizationId,
                 Name = entity.Name,
+                FullDescription = entity.FullDescription,
                 LogoImageUrl = entity.LogoImageUrl,
                 Format = entity.Format,
                 Map = entity.Map,

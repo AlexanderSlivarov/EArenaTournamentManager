@@ -46,6 +46,16 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="FullDescription" class="form-label"></label>
+                <textarea asp-for="FullDescription" class="form-control" rows="4"
+                          placeholder="Describe the tournament (30–1000 characters)"></textarea>
+                <span asp-validation-for="FullDescription" class="text-danger"></span>
+                <div class="form-text text-end">
+                    <span id="descCount">0</span> / 1000
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Logo</label>
                 <input type="hidden" asp-for="LogoImageUrl" id="logoImageUrl" />
                 <div>

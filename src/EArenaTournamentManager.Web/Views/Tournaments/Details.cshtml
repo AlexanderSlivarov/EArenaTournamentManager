@@ -98,6 +98,16 @@
             </div>
         }
 
+        @if (!string.IsNullOrEmpty(Model.FullDescription))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">FullDescription</h5>
+                    <p>@Model.FullDescription</p>
+                </div>
+            </div>
+        }
+
         @* Registration section — only when tournament is Open *@
         @if (ViewBag.IsLoggedIn == true && Model.Status == "Open")
         {

@@ -15,6 +15,7 @@ namespace EArenaTournamentManager.Application.ResponseDTOs.Tournaments
         public int OrganizationId { get; set; }
 
         public string Name { get; set; } = string.Empty;
+        public string FullDescription { get; set; } = string.Empty;
         public string? LogoImageUrl { get; set; }
         public string? Format { get; set; }
         public string? Map { get; set; }
